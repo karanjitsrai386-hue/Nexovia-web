@@ -1,58 +1,1396 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexovia Security</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXOVIA — AI Vision Layer for Every Camera</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+​
+:root {
+  --bg: #08090c;
+  --surface: #0e1015;
+  --border: #1a1d25;
+  --text: #c8ccd4;
+  --text-dim: #5a5f6b;
+  --accent: #00ff88;
+  --accent-dim: #00ff8822;
+  --red: #ff3344;
+  --amber: #ffaa22;
+  --blue: #3388ff;
+  --mono: 'DM Mono', monospace;
+  --serif: 'Instrument Serif', serif;
+  --sans: 'Syne', sans-serif;
+}
+​
+html { scroll-behavior: smooth; }
+​
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  overflow-x: hidden;
+  cursor: crosshair;
+}
+​
+/* Scanline overlay */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,255,136,0.015) 2px,
+    rgba(0,255,136,0.015) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+​
+/* Grid background */
+.grid-bg {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  z-index: 0;
+}
+​
+/* Navigation */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  backdrop-filter: blur(20px);
+  background: rgba(8,9,12,0.8);
+  border-bottom: 1px solid var(--border);
+}
+​
+.logo {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 6px;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+​
+.logo-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse-dot 2s ease infinite;
+  box-shadow: 0 0 12px var(--accent);
+}
+​
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+​
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+​
+.nav-links a {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+​
+.nav-links a:hover { color: var(--accent); }
+​
+.nav-cta {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 10px 24px;
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+​
+.nav-cta:hover {
+  background: var(--accent);
+  color: var(--bg);
+}
+​
+/* Hero */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 140px 40px 80px;
+  z-index: 1;
+  overflow: hidden;
+}
+​
+.hero-tag {
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 4px;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: slideUp 0.8s ease 0.2s forwards;
+}
+​
+.hero-tag::before {
+  content: '[ ';
+  color: var(--text-dim);
+}
+.hero-tag::after {
+  content: ' ]';
+  color: var(--text-dim);
+}
+​
+.hero h1 {
+  font-family: var(--serif);
+  font-size: clamp(48px, 8vw, 120px);
+  font-weight: 400;
+  line-height: 0.95;
+  color: #fff;
+  max-width: 900px;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: slideUp 0.8s ease 0.4s forwards;
+}
+​
+.hero h1 em {
+  font-style: italic;
+  color: var(--accent);
+  position: relative;
+}
+​
+.hero-desc {
+  font-family: var(--mono);
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--text-dim);
+  max-width: 520px;
+  margin-bottom: 48px;
+  opacity: 0;
+  animation: slideUp 0.8s ease 0.6s forwards;
+}
+​
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  opacity: 0;
+  animation: slideUp 0.8s ease 0.8s forwards;
+}
+​
+.btn-primary {
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 16px 40px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  font-weight: 500;
+}
+​
+.btn-primary:hover {
+  box-shadow: 0 0 30px var(--accent-dim), 0 0 60px rgba(0,255,136,0.1);
+  transform: translateY(-2px);
+}
+​
+.btn-secondary {
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 16px 40px;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+​
+.btn-secondary:hover {
+  border-color: var(--text-dim);
+}
+​
+/* Hero floating detection boxes */
+.detection-float {
+  position: absolute;
+  border: 1.5px solid;
+  opacity: 0;
+  animation: detectAppear 0.5s ease forwards;
+  pointer-events: none;
+}
+​
+.detection-float .det-label {
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  text-transform: uppercase;
+}
+​
+.det-1 {
+  right: 15%;
+  top: 25%;
+  width: 140px;
+  height: 200px;
+  border-color: var(--accent);
+  animation-delay: 1.2s;
+}
+.det-1 .det-label { background: var(--accent); color: var(--bg); }
+​
+.det-2 {
+  right: 8%;
+  top: 55%;
+  width: 200px;
+  height: 120px;
+  border-color: var(--amber);
+  animation-delay: 1.6s;
+}
+.det-2 .det-label { background: var(--amber); color: var(--bg); }
+​
+.det-3 {
+  right: 30%;
+  bottom: 15%;
+  width: 100px;
+  height: 100px;
+  border-color: var(--red);
+  animation-delay: 2s;
+}
+.det-3 .det-label { background: var(--red); color: #fff; }
+​
+.det-corners::before,
+.det-corners::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: inherit;
+}
+.det-corners::before {
+  top: -2px; left: -2px;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+.det-corners::after {
+  bottom: -2px; right: -2px;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
+}
+​
+@keyframes detectAppear {
+  0% { opacity: 0; transform: scale(1.1); }
+  100% { opacity: 0.7; transform: scale(1); }
+}
+​
+/* Stats bar */
+.stats-bar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+​
+.stat-item {
+  flex: 1;
+  padding: 40px;
+  border-right: 1px solid var(--border);
+  transition: background 0.3s;
+}
+​
+.stat-item:last-child { border-right: none; }
+​
+.stat-item:hover { background: var(--surface); }
+​
+.stat-number {
+  font-family: var(--serif);
+  font-size: 48px;
+  color: #fff;
+  margin-bottom: 8px;
+}
+​
+.stat-number span {
+  color: var(--accent);
+  font-size: 32px;
+}
+​
+.stat-label {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+​
+/* Section common */
+section {
+  position: relative;
+  z-index: 1;
+}
+​
+.section-header {
+  padding: 120px 40px 60px;
+  max-width: 800px;
+}
+​
+.section-tag {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+}
+​
+.section-title {
+  font-family: var(--serif);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+​
+.section-desc {
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text-dim);
+  max-width: 500px;
+}
+​
+/* Use cases — the core of the product */
+.use-cases {
+  padding: 0 40px 120px;
+}
+​
+.use-case-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--border);
+}
+​
+.use-case-card {
+  background: var(--bg);
+  padding: 48px 36px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s;
+  cursor: default;
+}
+​
+.use-case-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s;
+}
+​
+.use-case-card:hover::before { transform: scaleX(1); }
+​
+.use-case-card:hover { background: var(--surface); }
+​
+.uc-icon {
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+  font-size: 22px;
+  position: relative;
+}
+​
+.uc-icon::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  border-top: 1.5px solid var(--accent);
+  border-left: 1.5px solid var(--accent);
+}
+​
+.uc-title {
+  font-family: var(--sans);
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 12px;
+}
+​
+.uc-desc {
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text-dim);
+}
+​
+.uc-tag {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+​
+/* How it works */
+.how-section {
+  padding: 0 40px 120px;
+}
+​
+/* Architecture Diagram */
+.arch-diagram {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+​
+.arch-diagram::before {
+  content: '10 MIN SETUP';
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  opacity: 0.5;
+}
+​
+.arch-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+​
+.arch-node {
+  opacity: 0;
+  animation: nodeAppear 0.6s ease forwards;
+  animation-delay: var(--delay, 0s);
+}
+​
+@keyframes nodeAppear {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+​
+.hive-pulse {
+  animation: hivePulse 3s ease infinite;
+}
+​
+@keyframes hivePulse {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.35; }
+}
+​
+.hive-node {
+  filter: drop-shadow(0 0 15px rgba(0,255,136,0.1));
+}
+​
+.line-anim {
+  stroke-dasharray: 8 4;
+  animation: lineFlow 1.5s linear infinite;
+}
+​
+@keyframes lineFlow {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -24; }
+}
+​
+.how-steps {
+  display: flex;
+  gap: 0;
+  position: relative;
+}
+​
+.how-step {
+  flex: 1;
+  padding: 48px 36px;
+  border: 1px solid var(--border);
+  border-right: none;
+  position: relative;
+}
+​
+.how-step:last-child { border-right: 1px solid var(--border); }
+​
+.step-num {
+  font-family: var(--serif);
+  font-size: 72px;
+  color: var(--accent);
+  opacity: 0.15;
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  line-height: 1;
+}
+​
+.step-title {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 18px;
+  color: #fff;
+  margin-bottom: 12px;
+}
+​
+.step-desc {
+  font-family: var(--mono);
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text-dim);
+}
+​
+.how-step .connector {
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--accent);
+}
+​
+/* Detection demo mockup */
+.demo-section {
+  padding: 0 40px 120px;
+}
+​
+.demo-viewport {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  aspect-ratio: 21/9;
+  overflow: hidden;
+}
+​
+.demo-feed {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 50%, rgba(0,255,136,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 30%, rgba(51,136,255,0.03) 0%, transparent 50%),
+    var(--surface);
+}
+​
+.demo-hud-top {
+  position: absolute;
+  top: 16px; left: 20px; right: 20px;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+​
+.demo-hud-top .live {
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+​
+.live-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--red);
+  border-radius: 50%;
+  animation: pulse-dot 1s ease infinite;
+}
+​
+.demo-objects {
+  position: absolute;
+  inset: 60px 20px 40px;
+}
+​
+.demo-box {
+  position: absolute;
+  border: 1.5px solid;
+  transition: all 0.3s;
+}
+​
+.demo-box-label {
+  position: absolute;
+  top: -1px; left: -1px;
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 6px;
+  letter-spacing: 1px;
+}
+​
+.db-person {
+  left: 10%;
+  top: 20%;
+  width: 80px;
+  height: 160px;
+  border-color: var(--accent);
+}
+.db-person .demo-box-label { background: var(--accent); color: var(--bg); }
+​
+.db-car1 {
+  left: 35%;
+  top: 30%;
+  width: 180px;
+  height: 100px;
+  border-color: var(--blue);
+}
+.db-car1 .demo-box-label { background: var(--blue); color: #fff; }
+​
+.db-car2 {
+  right: 15%;
+  top: 15%;
+  width: 140px;
+  height: 80px;
+  border-color: var(--blue);
+}
+.db-car2 .demo-box-label { background: var(--blue); color: #fff; }
+​
+.db-alert {
+  right: 8%;
+  bottom: 10%;
+  width: 100px;
+  height: 90px;
+  border-color: var(--red);
+  animation: alertPulse 2s ease infinite;
+}
+.db-alert .demo-box-label { background: var(--red); color: #fff; }
+​
+@keyframes alertPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,51,68,0.3); }
+  50% { box-shadow: 0 0 20px 4px rgba(255,51,68,0.15); }
+}
+​
+.demo-tracking-line {
+  position: absolute;
+  left: 44%;
+  top: 55%;
+  width: 200px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--blue), transparent);
+  opacity: 0.4;
+  transform: rotate(-15deg);
+}
+​
+.demo-hud-bottom {
+  position: absolute;
+  bottom: 12px; left: 20px; right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+​
+.demo-log {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+​
+.demo-log span { opacity: 0.6; }
+.demo-log .log-alert { color: var(--red); opacity: 1; }
+​
+/* Industries */
+.industries-section {
+  padding: 0 40px 120px;
+}
+​
+.industry-row {
+  display: flex;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  transition: background 0.3s;
+}
+​
+.industry-row:last-child { border-bottom: 1px solid var(--border); }
+.industry-row:hover { background: var(--surface); }
+​
+.industry-id {
+  width: 80px;
+  padding: 28px;
+  border-right: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+}
+​
+.industry-name {
+  flex: 1;
+  padding: 28px 32px;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 18px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+}
+​
+.industry-detail {
+  flex: 2;
+  padding: 28px 32px;
+  font-family: var(--mono);
+  font-size: 15px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  display: flex;
+  align-items: center;
+}
+​
+.industry-status {
+  width: 120px;
+  padding: 28px;
+  border-left: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+​
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-dim);
+}
+​
+/* Tech spec */
+.tech-section {
+  padding: 0 40px 120px;
+}
+​
+.tech-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--border);
+}
+​
+.tech-cell {
+  padding: 40px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+​
+.tech-cell:nth-child(even) { border-right: none; }
+.tech-cell:nth-last-child(-n+2) { border-bottom: none; }
+​
+.tech-key {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+​
+.tech-val {
+  font-family: var(--serif);
+  font-size: 28px;
+  color: #fff;
+}
+​
+.tech-note {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+​
+/* CTA */
+.cta-section {
+  padding: 120px 40px;
+  text-align: center;
+  position: relative;
+  border-top: 1px solid var(--border);
+}
+​
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+  pointer-events: none;
+}
+​
+.cta-title {
+  font-family: var(--serif);
+  font-size: clamp(36px, 5vw, 72px);
+  color: #fff;
+  margin-bottom: 24px;
+  position: relative;
+}
+​
+.cta-desc {
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--text-dim);
+  margin-bottom: 48px;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.8;
+}
+​
+/* Footer */
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--border);
+  padding: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+​
+footer a {
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+​
+footer a:hover { color: var(--accent); }
+​
+.footer-links {
+  display: flex;
+  gap: 24px;
+}
+​
+/* Animations */
+@keyframes slideUp {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+​
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+​
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+​
+/* Scroll triggered stagger */
+.stagger-1 { transition-delay: 0.1s; }
+.stagger-2 { transition-delay: 0.2s; }
+.stagger-3 { transition-delay: 0.3s; }
+.stagger-4 { transition-delay: 0.4s; }
+.stagger-5 { transition-delay: 0.5s; }
+.stagger-6 { transition-delay: 0.6s; }
+​
+/* Responsive */
+@media (max-width: 900px) {
+  nav { padding: 16px 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 120px 20px 60px; }
+  .section-header { padding: 80px 20px 40px; }
+  .use-case-grid { grid-template-columns: 1fr; }
+  .use-cases, .how-section, .demo-section, .industries-section, .tech-section { padding: 0 20px 80px; }
+  .arch-diagram { padding: 20px 10px; }
+  .arch-diagram::before { font-size: 9px; top: 10px; right: 14px; }
+  .how-steps { flex-direction: column; }
+  .how-step { border-right: 1px solid var(--border); border-bottom: none; }
+  .how-step:last-child { border-bottom: 1px solid var(--border); }
+  .how-step .connector { display: none; }
+  .stats-bar { flex-direction: column; }
+  .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .stat-item:last-child { border-bottom: none; }
+  .industry-row { flex-direction: column; }
+  .industry-id { width: auto; border-right: none; border-bottom: 1px solid var(--border); padding: 16px 28px; }
+  .industry-name { padding: 16px 28px; }
+  .industry-detail { padding: 16px 28px; }
+  .industry-status { width: auto; border-left: none; border-top: 1px solid var(--border); padding: 16px 28px; justify-content: flex-start; }
+  .tech-grid { grid-template-columns: 1fr; }
+  .tech-cell { border-right: none; }
+  .tech-cell:nth-last-child(-n+2) { border-bottom: 1px solid var(--border); }
+  .tech-cell:last-child { border-bottom: none; }
+  .hero-actions { flex-direction: column; align-items: flex-start; }
+  .detection-float { display: none; }
+  footer { flex-direction: column; gap: 16px; text-align: center; }
+}
+</style>
 </head>
 <body>
-
-<header class="navbar">
-  <div class="logo">Nexovia</div>
-  <nav>
-    <a href="#">Products</a>
-    <a href="#">Solutions</a>
-    <a href="#">Platform</a>
-    <a href="#">Company</a>
-    <a href="#" class="btn-outline">Contact</a>
-  </nav>
-</header>
-
+​
+<div class="grid-bg"></div>
+​
+<!-- Nav -->
+<nav>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    NEXOVIA
+  </div>
+  <ul class="nav-links">
+    <li><a href="#capabilities">Capabilities</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#industries">Industries</a></li>
+    <li><a href="#specs">Specs</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Request Demo</a>
+</nav>
+​
+<!-- Hero -->
 <section class="hero">
-  <h1>Secure. Intelligent. Scalable.</h1>
-  <p>Cloud-managed physical security built for modern enterprises.</p>
-
-  <div class="hero-buttons">
-    <a class="btn-primary">Request Demo</a>
-    <a class="btn-secondary">Contact Sales</a>
+  <div class="hero-tag">AI-Powered Visual Intelligence</div>
+  <h1>Turn every camera into a <em>thinking</em> eye.</h1>
+  <p class="hero-desc">
+    A single device — the Nexovia Hive — sits between your existing cameras
+    and your network. No rip-and-replace. No new infrastructure. Just plug in
+    and your RTSP streams become intelligent, detecting threats in real time.
+  </p>
+  <div class="hero-actions">
+    <a href="#contact" class="btn-primary">Get Early Access</a>
+    <a href="#how" class="btn-secondary">See How It Works →</a>
+  </div>
+​
+  <!-- Floating detection boxes -->
+  <div class="detection-float det-1 det-corners">
+    <div class="det-label">person 0.94</div>
+  </div>
+  <div class="detection-float det-2 det-corners">
+    <div class="det-label">vehicle 0.87</div>
+  </div>
+  <div class="detection-float det-3 det-corners">
+    <div class="det-label">⚠ anomaly 0.72</div>
   </div>
 </section>
-
-<section class="products">
-  <div class="product-card">
-    <h3>Cloud Cameras</h3>
-    <p>Real-time video analytics with secure cloud access.</p>
+​
+<!-- Stats -->
+<div class="stats-bar">
+  <div class="stat-item reveal">
+    <div class="stat-number">&lt;50<span>ms</span></div>
+    <div class="stat-label">Detection Latency</div>
   </div>
-  <div class="product-card">
-    <h3>Access Control</h3>
-    <p>Zero-trust access management from anywhere.</p>
+  <div class="stat-item reveal stagger-1">
+    <div class="stat-number">100<span>+</span></div>
+    <div class="stat-label">Object Classes</div>
   </div>
-  <div class="product-card">
-    <h3>Environmental Sensors</h3>
-    <p>Monitor safety and environmental conditions.</p>
+  <div class="stat-item reveal stagger-2">
+    <div class="stat-number">10<span>min</span></div>
+    <div class="stat-label">Setup Time</div>
   </div>
-  <div class="product-card">
-    <h3>Unified Platform</h3>
-    <p>One platform. Full visibility. Total control.</p>
+  <div class="stat-item reveal stagger-3">
+    <div class="stat-number">24<span>/7</span></div>
+    <div class="stat-label">Autonomous Monitoring</div>
+  </div>
+</div>
+​
+<!-- Capabilities -->
+<section id="capabilities">
+  <div class="section-header reveal">
+    <div class="section-tag">// 01 — Capabilities</div>
+    <h2 class="section-title">One device. Every threat class.</h2>
+    <p class="section-desc">
+      Configure detection models per camera, per industry. The AI layer adapts
+      to your environment — retail, industrial, municipal, or residential.
+    </p>
+  </div>
+​
+  <div class="use-cases">
+    <div class="use-case-grid">
+      <div class="use-case-card reveal stagger-1">
+        <div class="uc-icon">🔫</div>
+        <div class="uc-title">Weapon Detection</div>
+        <div class="uc-desc">Identifies firearms and weapons in frame, instantly alerting control rooms and triggering lockdown protocols.</div>
+        <div class="uc-tag">Retail · Schools · Public Venues</div>
+      </div>
+      <div class="use-case-card reveal stagger-2">
+        <div class="uc-icon">🚗</div>
+        <div class="uc-title">Hit & Run Tracking</div>
+        <div class="uc-desc">Stitches footage across multiple municipal cameras to create a continuous pursuit timeline of fleeing vehicles.</div>
+        <div class="uc-tag">Municipal · Law Enforcement</div>
+      </div>
+      <div class="use-case-card reveal stagger-3">
+        <div class="uc-icon">⚠️</div>
+        <div class="uc-title">Accident Response</div>
+        <div class="uc-desc">Detects collisions and workplace accidents automatically, dispatching EMS alerts with location and severity data.</div>
+        <div class="uc-tag">Industrial · Roadways · Warehouses</div>
+      </div>
+      <div class="use-case-card reveal stagger-4">
+        <div class="uc-icon">🛢️</div>
+        <div class="uc-title">Spill Detection</div>
+        <div class="uc-desc">Flags hazardous material spills, oil leaks, and chemical exposure events the moment they begin.</div>
+        <div class="uc-tag">Garages · Factories · Energy</div>
+      </div>
+      <div class="use-case-card reveal stagger-5">
+        <div class="uc-icon">👤</div>
+        <div class="uc-title">Intrusion Alerts</div>
+        <div class="uc-desc">Distinguishes between authorized personnel and unauthorized presence using behavioral pattern analysis.</div>
+        <div class="uc-tag">Perimeter · Restricted Zones</div>
+      </div>
+      <div class="use-case-card reveal stagger-6">
+        <div class="uc-icon">📹</div>
+        <div class="uc-title">Seamless Handoff</div>
+        <div class="uc-desc">Cross-camera tracking creates a unified footage timeline, following subjects across your entire camera network.</div>
+        <div class="uc-tag">City-Wide · Campus · Retail Chain</div>
+      </div>
+    </div>
   </div>
 </section>
-
-<footer>
-  <p>© 2026 Nexovia Security Solutions</p>
-</footer>
-
-</body>
-</html>
+​
+<!-- How it works -->
+<section id="how">
+  <div class="section-header reveal">
+    <div class="section-tag">// 02 — The Nexovia Hive</div>
+    <h2 class="section-title">10 minute setup. Zero cameras replaced.</h2>
+    <p class="section-desc">
+      The Nexovia Hive sits between your existing IP cameras and your network.
+      No firmware updates. No camera swaps. Just plug in and your feeds become intelligent.
+    </p>
+  </div>
+​
+  <div class="how-section">
+    <!-- Architecture Diagram -->
+    <div class="arch-diagram reveal">
+      <svg viewBox="0 0 1000 520" xmlns="http://www.w3.org/2000/svg" class="arch-svg">
+        <!-- Connection lines -->
+        <path d="M 165 100 C 230 100, 280 195, 350 195" stroke="var(--accent)" stroke-width="1.5" fill="none" opacity="0.4" class="line-anim"/>
+        <path d="M 165 195 L 350 195" stroke="var(--accent)" stroke-width="1.5" fill="none" opacity="0.4" class="line-anim"/>
+        <path d="M 165 290 C 230 290, 280 195, 350 195" stroke="var(--accent)" stroke-width="1.5" fill="none" opacity="0.4" class="line-anim"/>
+        <path d="M 470 195 L 580 195" stroke="var(--accent)" stroke-width="1.5" fill="none" opacity="0.4" class="line-anim"/>
+        <path d="M 660 270 L 660 340 C 660 380, 400 380, 300 420" stroke="var(--accent)" stroke-width="1.5" fill="none" opacity="0.4" class="line-anim"/>
+        <path d="M 360 440 L 470 440" stroke="var(--accent)" stroke-width="1.5" fill="none" opacity="0.4" class="line-anim"/>
+        <path d="M 570 440 L 680 440" stroke="var(--accent)" stroke-width="1.5" fill="none" opacity="0.4" class="line-anim"/>
+​
+        <!-- Data flow particles -->
+        <circle r="3" fill="var(--accent)" opacity="0.8">
+          <animateMotion dur="2s" repeatCount="indefinite" path="M 165 195 L 350 195" begin="0s"/>
+        </circle>
+        <circle r="3" fill="var(--accent)" opacity="0.8">
+          <animateMotion dur="1.5s" repeatCount="indefinite" path="M 470 195 L 580 195" begin="0.5s"/>
+        </circle>
+        <circle r="3" fill="var(--accent)" opacity="0.8">
+          <animateMotion dur="2.5s" repeatCount="indefinite" path="M 360 440 L 470 440" begin="1s"/>
+        </circle>
+        <circle r="3" fill="var(--accent)" opacity="0.8">
+          <animateMotion dur="2s" repeatCount="indefinite" path="M 570 440 L 680 440" begin="1.5s"/>
+        </circle>
+​
+        <!-- Camera 1 -->
+        <g class="arch-node" style="--delay: 0s">
+          <rect x="40" y="68" width="125" height="56" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <circle cx="102" cy="96" r="14" fill="none" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <circle cx="102" cy="96" r="5" fill="var(--text-dim)"/>
+          <text x="60" y="82" font-family="DM Mono, monospace" font-size="8" fill="var(--accent)" letter-spacing="1">◆ NEXOVIA</text>
+        </g>
+​
+        <!-- Camera 2 -->
+        <g class="arch-node" style="--delay: 0.1s">
+          <rect x="40" y="163" width="125" height="56" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <circle cx="102" cy="191" r="14" fill="none" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <circle cx="102" cy="191" r="5" fill="var(--text-dim)"/>
+          <text x="60" y="177" font-family="DM Mono, monospace" font-size="8" fill="var(--accent)" letter-spacing="1">◆ NEXOVIA</text>
+        </g>
+​
+        <!-- Camera 3 -->
+        <g class="arch-node" style="--delay: 0.2s">
+          <rect x="40" y="258" width="125" height="56" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <circle cx="102" cy="286" r="14" fill="none" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <circle cx="102" cy="286" r="5" fill="var(--text-dim)"/>
+          <text x="60" y="272" font-family="DM Mono, monospace" font-size="8" fill="var(--accent)" letter-spacing="1">◆ NEXOVIA</text>
+        </g>
+​
+        <!-- Camera Label -->
+        <text x="102" y="345" font-family="DM Mono, monospace" font-size="11" fill="var(--text-dim)" text-anchor="middle" letter-spacing="1">ANY IP CAMERA</text>
+​
+        <!-- Switch -->
+        <g class="arch-node" style="--delay: 0.3s">
+          <rect x="350" y="170" width="120" height="50" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <rect x="370" y="190" width="10" height="14" rx="2" fill="var(--text-dim)" opacity="0.5"/>
+          <rect x="386" y="190" width="10" height="14" rx="2" fill="var(--text-dim)" opacity="0.5"/>
+          <rect x="402" y="190" width="10" height="14" rx="2" fill="var(--text-dim)" opacity="0.5"/>
+          <rect x="418" y="190" width="10" height="14" rx="2" fill="var(--accent)" opacity="0.6"/>
+          <circle cx="440" cy="185" r="3" fill="var(--accent)" opacity="0.6"/>
+        </g>
+        <text x="410" y="242" font-family="DM Mono, monospace" font-size="11" fill="var(--text-dim)" text-anchor="middle" letter-spacing="1">SWITCH</text>
+​
+        <!-- Nexovia Hive -->
+        <g class="arch-node hive-node" style="--delay: 0.4s">
+          <rect x="580" y="120" width="160" height="150" rx="6" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>
+          <line x1="600" y1="170" x2="640" y2="210" stroke="var(--accent)" stroke-width="1" opacity="0.15"/>
+          <line x1="620" y1="170" x2="660" y2="210" stroke="var(--accent)" stroke-width="1" opacity="0.15"/>
+          <line x1="640" y1="170" x2="680" y2="210" stroke="var(--accent)" stroke-width="1" opacity="0.15"/>
+          <line x1="660" y1="170" x2="700" y2="210" stroke="var(--accent)" stroke-width="1" opacity="0.15"/>
+          <line x1="680" y1="170" x2="720" y2="210" stroke="var(--accent)" stroke-width="1" opacity="0.15"/>
+          <circle cx="660" cy="235" r="10" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.5"/>
+          <line x1="660" y1="228" x2="660" y2="222" stroke="var(--accent)" stroke-width="1.5" opacity="0.5"/>
+          <text x="610" y="152" font-family="DM Mono, monospace" font-size="9" fill="var(--accent)" letter-spacing="2">◆ NEXOVIA</text>
+          <rect x="580" y="120" width="160" height="150" rx="6" fill="none" stroke="var(--accent)" stroke-width="1" opacity="0.2" class="hive-pulse"/>
+        </g>
+        <text x="660" y="295" font-family="Syne, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="600" letter-spacing="1">NEXOVIA HIVE</text>
+        <text x="660" y="312" font-family="DM Mono, monospace" font-size="9" fill="var(--accent)" text-anchor="middle" letter-spacing="1">AI PROCESSING</text>
+​
+        <!-- Router -->
+        <g class="arch-node" style="--delay: 0.5s">
+          <rect x="230" y="410" width="130" height="50" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <line x1="265" y1="410" x2="255" y2="395" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <line x1="295" y1="410" x2="295" y2="393" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <line x1="325" y1="410" x2="335" y2="395" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <circle cx="255" cy="393" r="2" fill="var(--text-dim)"/>
+          <circle cx="295" cy="391" r="2" fill="var(--text-dim)"/>
+          <circle cx="335" cy="393" r="2" fill="var(--text-dim)"/>
+        </g>
+        <text x="295" y="485" font-family="DM Mono, monospace" font-size="11" fill="var(--text-dim)" text-anchor="middle" letter-spacing="1">ROUTER / HUB / SERVERS</text>
+​
+        <!-- Internet -->
+        <g class="arch-node" style="--delay: 0.6s">
+          <circle cx="520" cy="440" r="28" fill="none" stroke="var(--border)" stroke-width="1.5"/>
+          <ellipse cx="520" cy="440" rx="28" ry="10" fill="none" stroke="var(--border)" stroke-width="1"/>
+          <line x1="492" y1="440" x2="548" y2="440" stroke="var(--border)" stroke-width="0.75"/>
+          <line x1="520" y1="412" x2="520" y2="468" stroke="var(--border)" stroke-width="0.75"/>
+        </g>
+        <text x="520" y="485" font-family="DM Mono, monospace" font-size="11" fill="var(--text-dim)" text-anchor="middle" letter-spacing="1">INTERNET</text>
+​
+        <!-- Devices -->
+        <g class="arch-node" style="--delay: 0.7s">
+          <rect x="700" y="425" width="45" height="30" rx="3" fill="none" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <rect x="694" y="455" width="57" height="4" rx="1" fill="var(--text-dim)" opacity="0.5"/>
+          <rect x="755" y="418" width="40" height="30" rx="2" fill="none" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <line x1="775" y1="448" x2="775" y2="457" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <line x1="765" y1="457" x2="785" y2="457" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <rect x="805" y="422" width="22" height="38" rx="3" fill="none" stroke="var(--text-dim)" stroke-width="1.5"/>
+          <line x1="812" y1="452" x2="820" y2="452" stroke="var(--text-dim)" stroke-width="1"/>
+        </g>
+        <text x="765" y="485" font-family="DM Mono, monospace" font-size="11" fill="var(--text-dim)" text-anchor="middle" letter-spacing="1">DEVICES</text>
+​
+        <!-- Connection dots -->
+        <circle cx="165" cy="100" r="4" fill="var(--accent)" opacity="0.6"/>
+        <circle cx="165" cy="195" r="4" fill="var(--accent)" opacity="0.6"/>
+        <circle cx="165" cy="290" r="4" fill="var(--accent)" opacity="0.6"/>
+        <circle cx="350" cy="195" r="4" fill="var(--accent)" opacity="0.6"/>
+        <circle cx="470" cy="195" r="4" fill="var(--accent)" opacity="0.6"/>
+        <circle cx="580" cy="195" r="4" fill="var(--accent)" opacity="0.6"/>
+        <circle cx="360" cy="440" r="4" fill="var(--accent)" opacity="0.6"/>
+        <circle cx="470" cy="440" r="4" fill="var(--accent)" opacity="0.6"/>
+        <circle cx="570" cy="440" r="4" fill="var(--accent)" opacity="0.6"/>
+        <circle cx="680" cy="440" r="4" fill="var(--accent)" opacity="0.6"/>
+      </svg>
+    </div>
+​
+    <!-- Steps below diagram -->
+    <div class="how-steps reveal" style="margin-top: 40px;">
+      <div class="how-step">
+        <div class="step-num">01</div>
+        <div class="step-title">Connect your cameras</div>
+        <div class="step-desc">Any IP camera with RTSP/ONVIF support connects through your existing network switch to the Nexovia Hive.</div>
+        <div class="connector">→</div>
+      </div>
+      <div class="how-step">
+        <div class="step-num">02</div>
+        <div class="step-title">Hive processes everything</div>
+        <div class="step-desc">The Hive runs AI inference on every feed simultaneously — detecting objects, threats, and anomalies on-device.</div>
+        <div class="connector">→</div>
+      </div>
+      <div class="how-step">
+        <div class="step-num">03</div>
+        <div class="step-title">Access from anywhere</div>
+        <div class="step-desc">Alerts and live AI-enhanced feeds route through your network to any device — laptop, phone, control room, or API.</div>
+      </div>
+    </div>
+  </div>
+</section>
+​
+<!-- Live Detection Demo -->
+<section>
+  <div class="section-header reveal">
+    <div class="section-tag">// 03 — Live View</div>
+    <h2 class="section-title">What your cameras <em>actually</em> see.</h2>
+    <p class="section-desc">
+      Every frame analyzed. Every object classified. Every anomaly flagged.
+      This is the AI layer running on top of a standard RTSP stream.
+    </p>
+  </div>
+​
+  <div class="demo-section">
+    <div class="demo-viewport reveal">
+      <div class="demo-feed"></div>
+​
+      <div class="demo-hud-top">
+        <span>CAM_07 — PARKING_LOT_NORTH — 1920×1080 @ 30FPS</span>
+        <span class="live"><span class="live-dot"></span> LIVE — 00:14:33:07</span>
+      </div>
+​
+      <div class="demo-objects">
+        <div class="demo-box db-person">
+          <div class="demo-box-label">PERSON 0.94</div>
+        </div>
+        <div class="demo-box db-car1">
+          <div class="demo-box-label">VEHICLE 0.89</div>
+        </div>
+        <div class="demo-box db-car2">
+          <div class="demo-box-label">VEHICLE 0.76</div>
+        </div>
+        <div class="demo-box db-alert">
+          <div class="demo-box-label">⚠ SPEED 0.81</div>
+        </div>
+        <div class="demo-tracking-line"></div>
+      </div>
+​
+      <div class="demo-hud-bottom">
+        <div class="demo-log">
+          <span>14:33:04 — VEHICLE_ENTER zone_A [plate: ****MX7]</span>
+          <span>14:33:05 — PERSON detected confidence 0.94</span>
+          <span class="log-alert">14:33:07 — ⚠ SPEED_VIOLATION vehicle_03 → 47km/h in 15km/h zone</span>
+        </div>
+        <span>NEXOVIA v2.4.1 — MODEL: yolov9-xl — GPU: 34°C — INFERENCE: 23ms</span>
+      </div>
+    </div>
+  </div>
+</section>
+​
+<!-- Industries -->
+<section id="industries">
+  <div class="section-header reveal">
+    <div class="section-tag">// 04 — Industries</div>
+    <h2 class="section-title">Built for every sector.</h2>
+  </div>
+​
+  <div class="industries-section">
+    <div class="industry-row reveal">
+      <div class="industry-id">001</div>
+      <div class="industry-name">Retail</div>
+      <div class="industry-detail">Weapon detection, shoplifting alerts, customer counting, and automatic control room escalation.</div>
+      <div class="industry-status"><div class="status-dot"></div></div>
+    </div>
+    <div class="industry-row reveal stagger-1">
+      <div class="industry-id">002</div>
+      <div class="industry-name">Industrial</div>
+      <div class="industry-detail">PPE compliance, spill detection, forklift proximity alerts, and automated incident reporting.</div>
+      <div class="industry-status"><div class="status-dot"></div></div>
+    </div>
+    <div class="industry-row reveal stagger-2">
+      <div class="industry-id">003</div>
+      <div class="industry-name">Municipal</div>
+      <div class="industry-detail">Cross-camera vehicle tracking, hit-and-run pursuit footage, traffic violation detection.</div>
+      <div class="industry-status"><div class="status-dot"></div></div>
+    </div>
+    <div class="industry-row reveal stagger-3">
+      <div class="industry-id">004</div>
+      <div class="industry-name">Healthcare</div>
+      <div class="industry-detail">Patient fall detection, restricted area monitoring, aggression recognition in waiting areas.</div>
+      <div class="industry-status"><div class="status-dot"></div></div>
+    </div>
+    <div class="industry-row reveal stagger-4">
+      <div class="industry-id">005</div>
+      <div class="industry-name">Education</div>
+      <div class="industry-detail">Campus perimeter security, weapon detection at entry points, crowd density monitoring.</div>
+      <div class="industry-status"><div class="status-dot"></div></div>
+    </div>
+    <div class="industry-row reveal stagger-5">
+      <div class="industry-id">006</div>
+      <div class="industry-name">Energy</div>
+      <div class="industry-detail">Pipeline leak detection, unauthorized drone alerts, fire and smoke recognition.</div>
+      <div class="industry-status"><div class="status-dot"></div></div>
+    </div>
+  </div>
+</section>
+​
+<!-- Specs -->
+<section id="specs">
+  <div class="section-header reveal">
+    <div class="section-tag">// 05 — Technical</div>
+    <h2 class="section-title">Under the hood.</h2>
+  </div>
+​
+  <div class="tech-section">
+    <div class="tech-grid reveal">
+      <div class="tech-cell">
+        <div class="tech-key">Processing</div>
+        <div class="tech-val">Edge AI</div>
+        <div class="tech-note">On-device inference — no cloud required</div>
+      </div>
+      <div class="tech-cell">
+        <div class="tech-key">Protocol</div>
+        <div class="tech-val">RTSP / ONVIF</div>
+        <div class="tech-note">Compatible with all major camera brands</div>
+      </div>
+      <div class="tech-cell">
+        <div class="tech-key">Latency</div>
+        <div class="tech-val">&lt; 50ms</div>
+        <div class="tech-note">Real-time inference per frame</div>
+      </div>
+      <div class="tech-cell">
+        <div class="tech-key">Streams</div>
+        <div class="tech-val">8–32</div>
+        <div class="tech-note">Simultaneous camera feeds per Hive</div>
+      </div>
+      <div class="tech-cell">
+        <div class="tech-key">Alerts</div>
+        <div class="tech-val">Multi-channel</div>
+        <div class="tech-note">SMS, webhook, SIP call, control room push</div>
+      </div>
+      <div class="tech-cell">
+        <div class="tech-key">Models</div>
+        <div class="tech-val">Swappable</div>
+        <div class="tech-note">Load custom ONNX/TensorRT models per camera</div>
+      </div>
+    </div>
+  <
