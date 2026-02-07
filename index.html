@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-​
+
 :root {
   --bg: #08090c;
   --surface: #0e1015;
@@ -23,9 +23,9 @@
   --serif: 'Instrument Serif', serif;
   --sans: 'Syne', sans-serif;
 }
-​
+
 html { scroll-behavior: smooth; }
-​
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -33,7 +33,7 @@ body {
   overflow-x: hidden;
   cursor: crosshair;
 }
-​
+
 /* Scanline overlay */
 body::after {
   content: '';
@@ -49,7 +49,7 @@ body::after {
   pointer-events: none;
   z-index: 9999;
 }
-​
+
 /* Grid background */
 .grid-bg {
   position: fixed;
@@ -60,7 +60,7 @@ body::after {
   background-size: 60px 60px;
   z-index: 0;
 }
-​
+
 /* Navigation */
 nav {
   position: fixed;
@@ -74,7 +74,7 @@ nav {
   background: rgba(8,9,12,0.8);
   border-bottom: 1px solid var(--border);
 }
-​
+
 .logo {
   font-family: var(--mono);
   font-size: 16px;
@@ -85,7 +85,7 @@ nav {
   align-items: center;
   gap: 12px;
 }
-​
+
 .logo-dot {
   width: 8px;
   height: 8px;
@@ -94,18 +94,18 @@ nav {
   animation: pulse-dot 2s ease infinite;
   box-shadow: 0 0 12px var(--accent);
 }
-​
+
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
 }
-​
+
 .nav-links {
   display: flex;
   gap: 32px;
   list-style: none;
 }
-​
+
 .nav-links a {
   font-family: var(--mono);
   font-size: 13px;
@@ -115,9 +115,9 @@ nav {
   text-transform: uppercase;
   transition: color 0.3s;
 }
-​
+
 .nav-links a:hover { color: var(--accent); }
-​
+
 .nav-cta {
   font-family: var(--mono);
   font-size: 13px;
@@ -131,12 +131,12 @@ nav {
   transition: all 0.3s;
   text-decoration: none;
 }
-​
+
 .nav-cta:hover {
   background: var(--accent);
   color: var(--bg);
 }
-​
+
 /* Hero */
 .hero {
   position: relative;
@@ -148,7 +148,7 @@ nav {
   z-index: 1;
   overflow: hidden;
 }
-​
+
 .hero-tag {
   font-family: var(--mono);
   font-size: 14px;
@@ -159,7 +159,7 @@ nav {
   opacity: 0;
   animation: slideUp 0.8s ease 0.2s forwards;
 }
-​
+
 .hero-tag::before {
   content: '[ ';
   color: var(--text-dim);
@@ -168,7 +168,7 @@ nav {
   content: ' ]';
   color: var(--text-dim);
 }
-​
+
 .hero h1 {
   font-family: var(--serif);
   font-size: clamp(48px, 8vw, 120px);
@@ -180,13 +180,13 @@ nav {
   opacity: 0;
   animation: slideUp 0.8s ease 0.4s forwards;
 }
-​
+
 .hero h1 em {
   font-style: italic;
   color: var(--accent);
   position: relative;
 }
-​
+
 .hero-desc {
   font-family: var(--mono);
   font-size: 17px;
@@ -197,7 +197,7 @@ nav {
   opacity: 0;
   animation: slideUp 0.8s ease 0.6s forwards;
 }
-​
+
 .hero-actions {
   display: flex;
   gap: 16px;
@@ -205,7 +205,7 @@ nav {
   opacity: 0;
   animation: slideUp 0.8s ease 0.8s forwards;
 }
-​
+
 .btn-primary {
   font-family: var(--mono);
   font-size: 14px;
@@ -220,12 +220,12 @@ nav {
   text-decoration: none;
   font-weight: 500;
 }
-​
+
 .btn-primary:hover {
   box-shadow: 0 0 30px var(--accent-dim), 0 0 60px rgba(0,255,136,0.1);
   transform: translateY(-2px);
 }
-​
+
 .btn-secondary {
   font-family: var(--mono);
   font-size: 14px;
@@ -239,11 +239,11 @@ nav {
   transition: all 0.3s;
   text-decoration: none;
 }
-​
+
 .btn-secondary:hover {
   border-color: var(--text-dim);
 }
-​
+
 /* Hero floating detection boxes */
 .detection-float {
   position: absolute;
@@ -252,7 +252,7 @@ nav {
   animation: detectAppear 0.5s ease forwards;
   pointer-events: none;
 }
-​
+
 .detection-float .det-label {
   position: absolute;
   top: -1px;
@@ -263,7 +263,7 @@ nav {
   padding: 2px 8px;
   text-transform: uppercase;
 }
-​
+
 .det-1 {
   right: 15%;
   top: 25%;
@@ -273,7 +273,7 @@ nav {
   animation-delay: 1.2s;
 }
 .det-1 .det-label { background: var(--accent); color: var(--bg); }
-​
+
 .det-2 {
   right: 8%;
   top: 55%;
@@ -283,7 +283,7 @@ nav {
   animation-delay: 1.6s;
 }
 .det-2 .det-label { background: var(--amber); color: var(--bg); }
-​
+
 .det-3 {
   right: 30%;
   bottom: 15%;
@@ -293,7 +293,7 @@ nav {
   animation-delay: 2s;
 }
 .det-3 .det-label { background: var(--red); color: #fff; }
-​
+
 .det-corners::before,
 .det-corners::after {
   content: '';
@@ -312,12 +312,12 @@ nav {
   border-bottom: 2px solid;
   border-right: 2px solid;
 }
-​
+
 @keyframes detectAppear {
   0% { opacity: 0; transform: scale(1.1); }
   100% { opacity: 0.7; transform: scale(1); }
 }
-​
+
 /* Stats bar */
 .stats-bar {
   position: relative;
@@ -326,30 +326,30 @@ nav {
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
-​
+
 .stat-item {
   flex: 1;
   padding: 40px;
   border-right: 1px solid var(--border);
   transition: background 0.3s;
 }
-​
+
 .stat-item:last-child { border-right: none; }
-​
+
 .stat-item:hover { background: var(--surface); }
-​
+
 .stat-number {
   font-family: var(--serif);
   font-size: 48px;
   color: #fff;
   margin-bottom: 8px;
 }
-​
+
 .stat-number span {
   color: var(--accent);
   font-size: 32px;
 }
-​
+
 .stat-label {
   font-family: var(--mono);
   font-size: 13px;
@@ -357,18 +357,18 @@ nav {
   text-transform: uppercase;
   color: var(--text-dim);
 }
-​
+
 /* Section common */
 section {
   position: relative;
   z-index: 1;
 }
-​
+
 .section-header {
   padding: 120px 40px 60px;
   max-width: 800px;
 }
-​
+
 .section-tag {
   font-family: var(--mono);
   font-size: 13px;
@@ -377,7 +377,7 @@ section {
   color: var(--accent);
   margin-bottom: 24px;
 }
-​
+
 .section-title {
   font-family: var(--serif);
   font-size: clamp(36px, 5vw, 64px);
@@ -386,7 +386,7 @@ section {
   line-height: 1.1;
   margin-bottom: 24px;
 }
-​
+
 .section-desc {
   font-family: var(--mono);
   font-size: 16px;
@@ -394,19 +394,19 @@ section {
   color: var(--text-dim);
   max-width: 500px;
 }
-​
+
 /* Use cases — the core of the product */
 .use-cases {
   padding: 0 40px 120px;
 }
-​
+
 .use-case-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2px;
   background: var(--border);
 }
-​
+
 .use-case-card {
   background: var(--bg);
   padding: 48px 36px;
@@ -415,7 +415,7 @@ section {
   transition: all 0.4s;
   cursor: default;
 }
-​
+
 .use-case-card::before {
   content: '';
   position: absolute;
@@ -427,11 +427,11 @@ section {
   transform-origin: left;
   transition: transform 0.4s;
 }
-​
+
 .use-case-card:hover::before { transform: scaleX(1); }
-​
+
 .use-case-card:hover { background: var(--surface); }
-​
+
 .uc-icon {
   width: 48px;
   height: 48px;
@@ -443,7 +443,7 @@ section {
   font-size: 22px;
   position: relative;
 }
-​
+
 .uc-icon::after {
   content: '';
   position: absolute;
@@ -454,7 +454,7 @@ section {
   border-top: 1.5px solid var(--accent);
   border-left: 1.5px solid var(--accent);
 }
-​
+
 .uc-title {
   font-family: var(--sans);
   font-size: 22px;
@@ -462,14 +462,14 @@ section {
   color: #fff;
   margin-bottom: 12px;
 }
-​
+
 .uc-desc {
   font-family: var(--mono);
   font-size: 15px;
   line-height: 1.8;
   color: var(--text-dim);
 }
-​
+
 .uc-tag {
   font-family: var(--mono);
   font-size: 12px;
@@ -480,12 +480,12 @@ section {
   padding-top: 16px;
   border-top: 1px solid var(--border);
 }
-​
+
 /* How it works */
 .how-section {
   padding: 0 40px 120px;
 }
-​
+
 /* Architecture Diagram */
 .arch-diagram {
   border: 1px solid var(--border);
@@ -494,7 +494,7 @@ section {
   position: relative;
   overflow: hidden;
 }
-​
+
 .arch-diagram::before {
   content: '10 MIN SETUP';
   position: absolute;
@@ -506,53 +506,53 @@ section {
   color: var(--accent);
   opacity: 0.5;
 }
-​
+
 .arch-svg {
   width: 100%;
   height: auto;
   display: block;
 }
-​
+
 .arch-node {
   opacity: 0;
   animation: nodeAppear 0.6s ease forwards;
   animation-delay: var(--delay, 0s);
 }
-​
+
 @keyframes nodeAppear {
   0% { opacity: 0; transform: translateY(10px); }
   100% { opacity: 1; transform: translateY(0); }
 }
-​
+
 .hive-pulse {
   animation: hivePulse 3s ease infinite;
 }
-​
+
 @keyframes hivePulse {
   0%, 100% { opacity: 0.1; }
   50% { opacity: 0.35; }
 }
-​
+
 .hive-node {
   filter: drop-shadow(0 0 15px rgba(0,255,136,0.1));
 }
-​
+
 .line-anim {
   stroke-dasharray: 8 4;
   animation: lineFlow 1.5s linear infinite;
 }
-​
+
 @keyframes lineFlow {
   0% { stroke-dashoffset: 0; }
   100% { stroke-dashoffset: -24; }
 }
-​
+
 .how-steps {
   display: flex;
   gap: 0;
   position: relative;
 }
-​
+
 .how-step {
   flex: 1;
   padding: 48px 36px;
@@ -560,9 +560,9 @@ section {
   border-right: none;
   position: relative;
 }
-​
+
 .how-step:last-child { border-right: 1px solid var(--border); }
-​
+
 .step-num {
   font-family: var(--serif);
   font-size: 72px;
@@ -573,7 +573,7 @@ section {
   right: 24px;
   line-height: 1;
 }
-​
+
 .step-title {
   font-family: var(--sans);
   font-weight: 600;
@@ -581,14 +581,14 @@ section {
   color: #fff;
   margin-bottom: 12px;
 }
-​
+
 .step-desc {
   font-family: var(--mono);
   font-size: 15px;
   line-height: 1.8;
   color: var(--text-dim);
 }
-​
+
 .how-step .connector {
   position: absolute;
   right: -14px;
@@ -606,12 +606,12 @@ section {
   font-size: 15px;
   color: var(--accent);
 }
-​
+
 /* Detection demo mockup */
 .demo-section {
   padding: 0 40px 120px;
 }
-​
+
 .demo-viewport {
   position: relative;
   background: var(--surface);
@@ -619,7 +619,7 @@ section {
   aspect-ratio: 21/9;
   overflow: hidden;
 }
-​
+
 .demo-feed {
   position: absolute;
   inset: 0;
@@ -628,7 +628,7 @@ section {
     radial-gradient(ellipse at 70% 30%, rgba(51,136,255,0.03) 0%, transparent 50%),
     var(--surface);
 }
-​
+
 .demo-hud-top {
   position: absolute;
   top: 16px; left: 20px; right: 20px;
@@ -639,14 +639,14 @@ section {
   letter-spacing: 1px;
   color: var(--text-dim);
 }
-​
+
 .demo-hud-top .live {
   color: var(--red);
   display: flex;
   align-items: center;
   gap: 6px;
 }
-​
+
 .live-dot {
   width: 6px;
   height: 6px;
@@ -654,18 +654,18 @@ section {
   border-radius: 50%;
   animation: pulse-dot 1s ease infinite;
 }
-​
+
 .demo-objects {
   position: absolute;
   inset: 60px 20px 40px;
 }
-​
+
 .demo-box {
   position: absolute;
   border: 1.5px solid;
   transition: all 0.3s;
 }
-​
+
 .demo-box-label {
   position: absolute;
   top: -1px; left: -1px;
@@ -674,7 +674,7 @@ section {
   padding: 2px 6px;
   letter-spacing: 1px;
 }
-​
+
 .db-person {
   left: 10%;
   top: 20%;
@@ -683,7 +683,7 @@ section {
   border-color: var(--accent);
 }
 .db-person .demo-box-label { background: var(--accent); color: var(--bg); }
-​
+
 .db-car1 {
   left: 35%;
   top: 30%;
@@ -692,7 +692,7 @@ section {
   border-color: var(--blue);
 }
 .db-car1 .demo-box-label { background: var(--blue); color: #fff; }
-​
+
 .db-car2 {
   right: 15%;
   top: 15%;
@@ -701,7 +701,7 @@ section {
   border-color: var(--blue);
 }
 .db-car2 .demo-box-label { background: var(--blue); color: #fff; }
-​
+
 .db-alert {
   right: 8%;
   bottom: 10%;
@@ -711,12 +711,12 @@ section {
   animation: alertPulse 2s ease infinite;
 }
 .db-alert .demo-box-label { background: var(--red); color: #fff; }
-​
+
 @keyframes alertPulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(255,51,68,0.3); }
   50% { box-shadow: 0 0 20px 4px rgba(255,51,68,0.15); }
 }
-​
+
 .demo-tracking-line {
   position: absolute;
   left: 44%;
@@ -727,7 +727,7 @@ section {
   opacity: 0.4;
   transform: rotate(-15deg);
 }
-​
+
 .demo-hud-bottom {
   position: absolute;
   bottom: 12px; left: 20px; right: 20px;
@@ -739,31 +739,31 @@ section {
   color: var(--text-dim);
   letter-spacing: 1px;
 }
-​
+
 .demo-log {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-​
+
 .demo-log span { opacity: 0.6; }
 .demo-log .log-alert { color: var(--red); opacity: 1; }
-​
+
 /* Industries */
 .industries-section {
   padding: 0 40px 120px;
 }
-​
+
 .industry-row {
   display: flex;
   border: 1px solid var(--border);
   border-bottom: none;
   transition: background 0.3s;
 }
-​
+
 .industry-row:last-child { border-bottom: 1px solid var(--border); }
 .industry-row:hover { background: var(--surface); }
-​
+
 .industry-id {
   width: 80px;
   padding: 28px;
@@ -774,7 +774,7 @@ section {
   display: flex;
   align-items: center;
 }
-​
+
 .industry-name {
   flex: 1;
   padding: 28px 32px;
@@ -785,7 +785,7 @@ section {
   display: flex;
   align-items: center;
 }
-​
+
 .industry-detail {
   flex: 2;
   padding: 28px 32px;
@@ -796,7 +796,7 @@ section {
   display: flex;
   align-items: center;
 }
-​
+
 .industry-status {
   width: 120px;
   padding: 28px;
@@ -805,7 +805,7 @@ section {
   align-items: center;
   justify-content: center;
 }
-​
+
 .status-dot {
   width: 8px;
   height: 8px;
@@ -813,27 +813,27 @@ section {
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent-dim);
 }
-​
+
 /* Tech spec */
 .tech-section {
   padding: 0 40px 120px;
 }
-​
+
 .tech-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   border: 1px solid var(--border);
 }
-​
+
 .tech-cell {
   padding: 40px;
   border-bottom: 1px solid var(--border);
   border-right: 1px solid var(--border);
 }
-​
+
 .tech-cell:nth-child(even) { border-right: none; }
 .tech-cell:nth-last-child(-n+2) { border-bottom: none; }
-​
+
 .tech-key {
   font-family: var(--mono);
   font-size: 13px;
@@ -842,20 +842,20 @@ section {
   color: var(--accent);
   margin-bottom: 8px;
 }
-​
+
 .tech-val {
   font-family: var(--serif);
   font-size: 28px;
   color: #fff;
 }
-​
+
 .tech-note {
   font-family: var(--mono);
   font-size: 14px;
   color: var(--text-dim);
   margin-top: 4px;
 }
-​
+
 /* CTA */
 .cta-section {
   padding: 120px 40px;
@@ -863,7 +863,7 @@ section {
   position: relative;
   border-top: 1px solid var(--border);
 }
-​
+
 .cta-section::before {
   content: '';
   position: absolute;
@@ -873,7 +873,7 @@ section {
   background: radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
   pointer-events: none;
 }
-​
+
 .cta-title {
   font-family: var(--serif);
   font-size: clamp(36px, 5vw, 72px);
@@ -881,7 +881,7 @@ section {
   margin-bottom: 24px;
   position: relative;
 }
-​
+
 .cta-desc {
   font-family: var(--mono);
   font-size: 16px;
@@ -892,7 +892,7 @@ section {
   margin-right: auto;
   line-height: 1.8;
 }
-​
+
 /* Footer */
 footer {
   position: relative;
@@ -907,37 +907,37 @@ footer {
   color: var(--text-dim);
   letter-spacing: 1px;
 }
-​
+
 footer a {
   color: var(--text-dim);
   text-decoration: none;
   transition: color 0.3s;
 }
-​
+
 footer a:hover { color: var(--accent); }
-​
+
 .footer-links {
   display: flex;
   gap: 24px;
 }
-​
+
 /* Animations */
 @keyframes slideUp {
   0% { opacity: 0; transform: translateY(30px); }
   100% { opacity: 1; transform: translateY(0); }
 }
-​
+
 .reveal {
   opacity: 0;
   transform: translateY(40px);
   transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
-​
+
 .reveal.visible {
   opacity: 1;
   transform: translateY(0);
 }
-​
+
 /* Scroll triggered stagger */
 .stagger-1 { transition-delay: 0.1s; }
 .stagger-2 { transition-delay: 0.2s; }
@@ -945,7 +945,7 @@ footer a:hover { color: var(--accent); }
 .stagger-4 { transition-delay: 0.4s; }
 .stagger-5 { transition-delay: 0.5s; }
 .stagger-6 { transition-delay: 0.6s; }
-​
+
 /* Responsive */
 @media (max-width: 900px) {
   nav { padding: 16px 20px; }
@@ -979,9 +979,9 @@ footer a:hover { color: var(--accent); }
 </style>
 </head>
 <body>
-​
+
 <div class="grid-bg"></div>
-​
+
 <!-- Nav -->
 <nav>
   <div class="logo">
@@ -996,7 +996,7 @@ footer a:hover { color: var(--accent); }
   </ul>
   <a href="#contact" class="nav-cta">Request Demo</a>
 </nav>
-​
+
 <!-- Hero -->
 <section class="hero">
   <div class="hero-tag">AI-Powered Visual Intelligence</div>
@@ -1010,7 +1010,7 @@ footer a:hover { color: var(--accent); }
     <a href="#contact" class="btn-primary">Get Early Access</a>
     <a href="#how" class="btn-secondary">See How It Works →</a>
   </div>
-​
+
   <!-- Floating detection boxes -->
   <div class="detection-float det-1 det-corners">
     <div class="det-label">person 0.94</div>
@@ -1022,7 +1022,7 @@ footer a:hover { color: var(--accent); }
     <div class="det-label">⚠ anomaly 0.72</div>
   </div>
 </section>
-​
+
 <!-- Stats -->
 <div class="stats-bar">
   <div class="stat-item reveal">
@@ -1042,7 +1042,7 @@ footer a:hover { color: var(--accent); }
     <div class="stat-label">Autonomous Monitoring</div>
   </div>
 </div>
-​
+
 <!-- Capabilities -->
 <section id="capabilities">
   <div class="section-header reveal">
@@ -1053,7 +1053,7 @@ footer a:hover { color: var(--accent); }
       to your environment — retail, industrial, municipal, or residential.
     </p>
   </div>
-​
+
   <div class="use-cases">
     <div class="use-case-grid">
       <div class="use-case-card reveal stagger-1">
@@ -1095,7 +1095,7 @@ footer a:hover { color: var(--accent); }
     </div>
   </div>
 </section>
-​
+
 <!-- How it works -->
 <section id="how">
   <div class="section-header reveal">
@@ -1106,7 +1106,7 @@ footer a:hover { color: var(--accent); }
       No firmware updates. No camera swaps. Just plug in and your feeds become intelligent.
     </p>
   </div>
-​
+
   <div class="how-section">
     <!-- Architecture Diagram -->
     <div class="arch-diagram reveal">
@@ -1119,7 +1119,7 @@ footer a:hover { color: var(--accent); }
         <path d="M 660 270 L 660 340 C 660 380, 400 380, 300 420" stroke="var(--accent)" stroke-width="1.5" fill="none" opacity="0.4" class="line-anim"/>
         <path d="M 360 440 L 470 440" stroke="var(--accent)" stroke-width="1.5" fill="none" opacity="0.4" class="line-anim"/>
         <path d="M 570 440 L 680 440" stroke="var(--accent)" stroke-width="1.5" fill="none" opacity="0.4" class="line-anim"/>
-​
+
         <!-- Data flow particles -->
         <circle r="3" fill="var(--accent)" opacity="0.8">
           <animateMotion dur="2s" repeatCount="indefinite" path="M 165 195 L 350 195" begin="0s"/>
@@ -1133,7 +1133,7 @@ footer a:hover { color: var(--accent); }
         <circle r="3" fill="var(--accent)" opacity="0.8">
           <animateMotion dur="2s" repeatCount="indefinite" path="M 570 440 L 680 440" begin="1.5s"/>
         </circle>
-​
+
         <!-- Camera 1 -->
         <g class="arch-node" style="--delay: 0s">
           <rect x="40" y="68" width="125" height="56" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
@@ -1141,7 +1141,7 @@ footer a:hover { color: var(--accent); }
           <circle cx="102" cy="96" r="5" fill="var(--text-dim)"/>
           <text x="60" y="82" font-family="DM Mono, monospace" font-size="8" fill="var(--accent)" letter-spacing="1">◆ NEXOVIA</text>
         </g>
-​
+
         <!-- Camera 2 -->
         <g class="arch-node" style="--delay: 0.1s">
           <rect x="40" y="163" width="125" height="56" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
@@ -1149,7 +1149,7 @@ footer a:hover { color: var(--accent); }
           <circle cx="102" cy="191" r="5" fill="var(--text-dim)"/>
           <text x="60" y="177" font-family="DM Mono, monospace" font-size="8" fill="var(--accent)" letter-spacing="1">◆ NEXOVIA</text>
         </g>
-​
+
         <!-- Camera 3 -->
         <g class="arch-node" style="--delay: 0.2s">
           <rect x="40" y="258" width="125" height="56" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
@@ -1157,10 +1157,10 @@ footer a:hover { color: var(--accent); }
           <circle cx="102" cy="286" r="5" fill="var(--text-dim)"/>
           <text x="60" y="272" font-family="DM Mono, monospace" font-size="8" fill="var(--accent)" letter-spacing="1">◆ NEXOVIA</text>
         </g>
-​
+
         <!-- Camera Label -->
         <text x="102" y="345" font-family="DM Mono, monospace" font-size="11" fill="var(--text-dim)" text-anchor="middle" letter-spacing="1">ANY IP CAMERA</text>
-​
+
         <!-- Switch -->
         <g class="arch-node" style="--delay: 0.3s">
           <rect x="350" y="170" width="120" height="50" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
@@ -1171,7 +1171,7 @@ footer a:hover { color: var(--accent); }
           <circle cx="440" cy="185" r="3" fill="var(--accent)" opacity="0.6"/>
         </g>
         <text x="410" y="242" font-family="DM Mono, monospace" font-size="11" fill="var(--text-dim)" text-anchor="middle" letter-spacing="1">SWITCH</text>
-​
+
         <!-- Nexovia Hive -->
         <g class="arch-node hive-node" style="--delay: 0.4s">
           <rect x="580" y="120" width="160" height="150" rx="6" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"/>
@@ -1187,7 +1187,7 @@ footer a:hover { color: var(--accent); }
         </g>
         <text x="660" y="295" font-family="Syne, sans-serif" font-size="14" fill="#fff" text-anchor="middle" font-weight="600" letter-spacing="1">NEXOVIA HIVE</text>
         <text x="660" y="312" font-family="DM Mono, monospace" font-size="9" fill="var(--accent)" text-anchor="middle" letter-spacing="1">AI PROCESSING</text>
-​
+
         <!-- Router -->
         <g class="arch-node" style="--delay: 0.5s">
           <rect x="230" y="410" width="130" height="50" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
@@ -1199,7 +1199,7 @@ footer a:hover { color: var(--accent); }
           <circle cx="335" cy="393" r="2" fill="var(--text-dim)"/>
         </g>
         <text x="295" y="485" font-family="DM Mono, monospace" font-size="11" fill="var(--text-dim)" text-anchor="middle" letter-spacing="1">ROUTER / HUB / SERVERS</text>
-​
+
         <!-- Internet -->
         <g class="arch-node" style="--delay: 0.6s">
           <circle cx="520" cy="440" r="28" fill="none" stroke="var(--border)" stroke-width="1.5"/>
@@ -1208,7 +1208,7 @@ footer a:hover { color: var(--accent); }
           <line x1="520" y1="412" x2="520" y2="468" stroke="var(--border)" stroke-width="0.75"/>
         </g>
         <text x="520" y="485" font-family="DM Mono, monospace" font-size="11" fill="var(--text-dim)" text-anchor="middle" letter-spacing="1">INTERNET</text>
-​
+
         <!-- Devices -->
         <g class="arch-node" style="--delay: 0.7s">
           <rect x="700" y="425" width="45" height="30" rx="3" fill="none" stroke="var(--text-dim)" stroke-width="1.5"/>
@@ -1220,7 +1220,7 @@ footer a:hover { color: var(--accent); }
           <line x1="812" y1="452" x2="820" y2="452" stroke="var(--text-dim)" stroke-width="1"/>
         </g>
         <text x="765" y="485" font-family="DM Mono, monospace" font-size="11" fill="var(--text-dim)" text-anchor="middle" letter-spacing="1">DEVICES</text>
-​
+
         <!-- Connection dots -->
         <circle cx="165" cy="100" r="4" fill="var(--accent)" opacity="0.6"/>
         <circle cx="165" cy="195" r="4" fill="var(--accent)" opacity="0.6"/>
@@ -1234,7 +1234,7 @@ footer a:hover { color: var(--accent); }
         <circle cx="680" cy="440" r="4" fill="var(--accent)" opacity="0.6"/>
       </svg>
     </div>
-​
+
     <!-- Steps below diagram -->
     <div class="how-steps reveal" style="margin-top: 40px;">
       <div class="how-step">
@@ -1257,7 +1257,7 @@ footer a:hover { color: var(--accent); }
     </div>
   </div>
 </section>
-​
+
 <!-- Live Detection Demo -->
 <section>
   <div class="section-header reveal">
@@ -1268,16 +1268,16 @@ footer a:hover { color: var(--accent); }
       This is the AI layer running on top of a standard RTSP stream.
     </p>
   </div>
-​
+
   <div class="demo-section">
     <div class="demo-viewport reveal">
       <div class="demo-feed"></div>
-​
+
       <div class="demo-hud-top">
         <span>CAM_07 — PARKING_LOT_NORTH — 1920×1080 @ 30FPS</span>
         <span class="live"><span class="live-dot"></span> LIVE — 00:14:33:07</span>
       </div>
-​
+
       <div class="demo-objects">
         <div class="demo-box db-person">
           <div class="demo-box-label">PERSON 0.94</div>
@@ -1293,7 +1293,7 @@ footer a:hover { color: var(--accent); }
         </div>
         <div class="demo-tracking-line"></div>
       </div>
-​
+
       <div class="demo-hud-bottom">
         <div class="demo-log">
           <span>14:33:04 — VEHICLE_ENTER zone_A [plate: ****MX7]</span>
@@ -1305,14 +1305,14 @@ footer a:hover { color: var(--accent); }
     </div>
   </div>
 </section>
-​
+
 <!-- Industries -->
 <section id="industries">
   <div class="section-header reveal">
     <div class="section-tag">// 04 — Industries</div>
     <h2 class="section-title">Built for every sector.</h2>
   </div>
-​
+
   <div class="industries-section">
     <div class="industry-row reveal">
       <div class="industry-id">001</div>
@@ -1352,14 +1352,14 @@ footer a:hover { color: var(--accent); }
     </div>
   </div>
 </section>
-​
+
 <!-- Specs -->
 <section id="specs">
   <div class="section-header reveal">
     <div class="section-tag">// 05 — Technical</div>
     <h2 class="section-title">Under the hood.</h2>
   </div>
-​
+
   <div class="tech-section">
     <div class="tech-grid reveal">
       <div class="tech-cell">
@@ -1393,4 +1393,74 @@ footer a:hover { color: var(--accent); }
         <div class="tech-note">Load custom ONNX/TensorRT models per camera</div>
       </div>
     </div>
-  <
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <h2 class="cta-title reveal">Your cameras already see everything.<br><em style="font-family: var(--serif); color: var(--accent);">Now make them understand.</em></h2>
+  <p class="cta-desc reveal stagger-1">
+    Join the early access program. We'll ship a Nexovia Hive,
+    connect it to your cameras, and show you what you've been missing.
+  </p>
+  <div class="reveal stagger-2">
+    <a href="mailto:hello@nexovia.ai" class="btn-primary">Request Early Access</a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="logo" style="font-size: 14px; letter-spacing: 4px;">
+    <div class="logo-dot" style="width: 6px; height: 6px;"></div>
+    NEXOVIA
+  </div>
+  <div class="footer-links">
+    <a href="#">Documentation</a>
+    <a href="#">API</a>
+    <a href="#">GitHub</a>
+    <a href="#">Contact</a>
+  </div>
+  <span>© 2026 NEXOVIA — ALL RIGHTS RESERVED</span>
+</footer>
+
+<script>
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+reveals.forEach(el => observer.observe(el));
+
+// Animate demo timestamp
+const timeEl = document.querySelector('.live');
+if (timeEl) {
+  let s = 0;
+  setInterval(() => {
+    s++;
+    const h = String(Math.floor(s/3600)).padStart(2,'0');
+    const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+    const sec = String(s%60).padStart(2,'0');
+    const f = String(Math.floor(Math.random()*30)).padStart(2,'0');
+    timeEl.innerHTML = `<span class="live-dot"></span> LIVE — 00:${m}:${sec}:${f}`;
+  }, 1000);
+}
+
+// Subtle parallax on detection boxes
+document.addEventListener('mousemove', (e) => {
+  const boxes = document.querySelectorAll('.detection-float');
+  const x = (e.clientX / window.innerWidth - 0.5) * 20;
+  const y = (e.clientY / window.innerHeight - 0.5) * 20;
+  boxes.forEach((box, i) => {
+    const factor = (i + 1) * 0.4;
+    box.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
+  });
+});
+</script>
+
+</body>
+</html>
