@@ -43,7 +43,7 @@ Retail · Industrial · Municipal · Healthcare · Education · Energy
 
 ## Status
 
-🟢 Early access — [request a demo](mailto:hello@nexovia.ai)
+🟢 Early access — [request a demo](mailto:karanjit@nexoviasecuritysolutions.com)
 
 ## License
 
