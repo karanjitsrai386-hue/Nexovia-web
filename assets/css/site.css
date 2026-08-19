@@ -749,13 +749,23 @@ em, .accent-em {
   border: 1px solid var(--nx-border-lit);
 }
 
-/* A phone screenshot is roughly 1:1.65, so at the full width of a column it
-   renders a metre tall — measured at 644x1062 inside a copy column and 602x926
-   in a split, dwarfing the text beside it. Cap the width so it reads as a
-   phone rather than a poster. */
+/* A full phone screenshot is roughly 1:1.65, so at the full width of a column
+   it renders a metre tall — measured at 644x1062 inside a copy column and
+   602x926 in a split, dwarfing the text beside it. Cap the width so it reads
+   as a phone rather than a poster. */
 .shot-phone img,
 img.shot-phone {
   max-width: 320px;
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid var(--nx-border-lit);
+}
+
+/* For a crop of part of an interface rather than a whole phone. Same border,
+   no width cap — .shot-phone put this one at 320px in a 644px column, leaving
+   half the column empty, because the aspect is near-square rather than 1:1.65. */
+img.shot-ui {
   width: 100%;
   height: auto;
   display: block;
