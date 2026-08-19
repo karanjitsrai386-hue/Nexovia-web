@@ -1641,17 +1641,60 @@ em, .accent-em {
 .price-card.featured {
   background: linear-gradient(180deg, rgba(0,255,136,0.05) 0%, var(--surface) 42%);
 }
-/* The BorderBeam island animates continuously and has no reduced-motion
-   handling of its own. Everything else on this site does, so it does not get
-   an exemption for being decorative — decoration is exactly what a person with
-   vestibular sensitivity wants stopped. The card keeps its green wash, so the
-   "most sites land here" emphasis survives without the movement.
+/* ---- the beam on the recommended plan ----
 
-   Descendant selector, not a child one: Astro wraps a hydrated island in an
-   <astro-island> element, so the beam is a grandchild of the card rather than
-   a direct child. A `>` here silently matched nothing. */
+   This was a React island (Magic UI's BorderBeam). It worked, but measured on
+   the production build it cost 46.3KB gzipped of `motion` — and because it was
+   the last React component on the site, it also kept the 55.8KB React runtime
+   alive on this page after the nav was converted to plain Astro. 102KB for one
+   moving line.
+
+   Same effect in CSS, 0KB. A narrow bright arc in a conic gradient, rotated by
+   animating a registered custom property, masked down to the 1.5px border ring.
+   Rotating a conic gradient around a rectangle reads as a beam travelling the
+   edge, which is what the island was drawing along an offset-path.
+
+   @property is what makes it animate at all — a plain custom property is a
+   string to the animation engine and would jump from 0 to 360 with nothing in
+   between. Where @property is unsupported the gradient still paints, so the
+   fallback is a static green glow on one corner rather than a broken card. */
+@property --nx-beam {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.price-card.featured::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1.5px;                 /* the ring thickness */
+  background: conic-gradient(
+    from var(--nx-beam),
+    transparent 0 58%,
+    var(--nx-accent-mid) 72%,
+    var(--nx-accent) 80%,
+    transparent 86% 100%
+  );
+  /* paint only the ring: fill minus content-box, so the middle is cut out */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: nx-beam-travel 7s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes nx-beam-travel { to { --nx-beam: 360deg; } }
+
+/* the flag sits in the top-right corner, exactly where the ring passes */
+.price-card.featured .price-flag { z-index: 2; }
+
+/* Decoration is precisely what a person with vestibular sensitivity wants
+   stopped, so this gets no exemption. The card keeps its green wash, so the
+   "most sites land here" emphasis survives without the movement. */
 @media (prefers-reduced-motion: reduce) {
-  .price-card.featured div[class*="pointer-events-none"] { display: none; }
+  .price-card.featured::before { animation: none; opacity: 0.5; }
 }
 
 .price-flag {
