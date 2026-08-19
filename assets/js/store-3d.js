@@ -306,6 +306,113 @@ function init(host) {
   shelf(-1.4, 0.2);
   shelf(2.2, 0.2);
 
+  /* ---------- stock on the shelves ----------
+
+     Empty shelving read as an architectural render rather than a shop, which
+     mattered most in the two chapters that carry the argument: a person taking
+     something off a bare shelf does not look like theft, and an aisle with
+     nothing in it does not look like somewhere a fall would go unnoticed.
+
+     InstancedMesh rather than ~230 separate meshes — one draw call for the
+     boxes, one for the bottles. These carry no EdgesGeometry either, unlike
+     everything from boxAt(): at this size the wireframe reads as visual noise
+     and doubles the geometry for objects a metre from camera at their closest.
+
+     Seeded PRNG so the shelves are laid out identically on every load. With
+     Math.random the scene reshuffled on each visit, and the theft chapter — the
+     camera pushing toward one specific shelf — landed differently every time. */
+  function stockShelves() {
+    let seed = 0x9e3779b9;
+    const rnd = () => {
+      seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5;
+      return ((seed >>> 0) % 100000) / 100000;
+    };
+
+    /* Deck surfaces: base top, then the two boards. */
+    const DECKS = [0.09, 0.75, 1.37];
+    const SHELVES = [-1.4, 2.2];
+    /* Muted, in the room's own palette — goods should read as mass, not as a
+       colour story competing with the green. */
+    const TONES = [0x2f3a47, 0x38424f, 0x2a343f, 0x424c58, 0x333e4a, 0x3d4854];
+
+    const boxes = [];
+    const bottles = [];
+    const m4 = new THREE.Matrix4();
+    const q = new THREE.Quaternion();
+    const pos = new THREE.Vector3();
+    const scl = new THREE.Vector3();
+
+    for (const cx of SHELVES) {
+      for (const deckY of DECKS) {
+        /* two rows across the shelf's 1.0m depth, front and back */
+        for (const row of [-0.22, 0.16]) {
+          let z = -2.05;
+          while (z < 2.45) {
+            const kind = rnd();
+            if (kind > 0.82) {
+              /* a bottle: taller, narrower, occasionally a run of them */
+              const h = 0.16 + rnd() * 0.1;
+              const r = 0.032 + rnd() * 0.014;
+              pos.set(cx + row + (rnd() - 0.5) * 0.05, deckY + h / 2, z + r);
+              scl.set(r * 2, h, r * 2);
+              m4.compose(pos, q, scl);
+              bottles.push(m4.clone());
+              z += r * 2 + 0.012;
+            } else {
+              const w = 0.09 + rnd() * 0.13;
+              const h = 0.11 + rnd() * 0.14;
+              const d = 0.1 + rnd() * 0.1;
+              pos.set(cx + row + (rnd() - 0.5) * 0.06, deckY + h / 2, z + d / 2);
+              /* a few sitting slightly askew — a perfectly faced shelf looks
+                 like a planogram, not a shop anyone has shopped in */
+              q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), (rnd() - 0.5) * 0.22);
+              scl.set(w, h, d);
+              m4.compose(pos, q, scl);
+              boxes.push({ m: m4.clone(), tone: TONES[(boxes.length + Math.floor(rnd() * 6)) % TONES.length] });
+              q.identity();
+              z += d + 0.02 + rnd() * 0.05;
+            }
+            /* leave the odd gap — a sold-out facing */
+            if (rnd() > 0.9) z += 0.12 + rnd() * 0.16;
+          }
+        }
+      }
+    }
+
+    /* one mesh per tone keeps per-instance colour out of it, which needs
+       vertexColors plumbing this scene does not otherwise use */
+    for (const tone of TONES) {
+      const mine = boxes.filter((b) => b.tone === tone);
+      if (!mine.length) continue;
+      const im = new THREE.InstancedMesh(
+        new THREE.BoxGeometry(1, 1, 1),
+        new THREE.MeshStandardMaterial({ color: tone, roughness: 0.94, metalness: 0.04 }),
+        mine.length
+      );
+      mine.forEach((b, i) => im.setMatrixAt(i, b.m));
+      im.instanceMatrix.needsUpdate = true;
+      im.castShadow = true;
+      im.receiveShadow = true;
+      scene.add(im);
+    }
+
+    if (bottles.length) {
+      const im = new THREE.InstancedMesh(
+        new THREE.CylinderGeometry(0.5, 0.5, 1, 10),
+        new THREE.MeshStandardMaterial({ color: 0x36414d, roughness: 0.6, metalness: 0.12 }),
+        bottles.length
+      );
+      bottles.forEach((m, i) => im.setMatrixAt(i, m));
+      im.instanceMatrix.needsUpdate = true;
+      im.castShadow = true;
+      im.receiveShadow = true;
+      scene.add(im);
+    }
+
+    return boxes.length + bottles.length;
+  }
+  stockShelves();
+
   /* ---------- people ----------
      A person, not a shop dummy. Three things separate the two, and the
      old rig missed all three.
