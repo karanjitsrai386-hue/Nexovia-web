@@ -723,6 +723,21 @@ em, .accent-em {
   border-top: 1px solid var(--nx-border);
 }
 
+/* Honeypot on the contact form.
+
+   Not `display:none` and not `type="hidden"` — the better bots skip both. This
+   keeps the field in the layout tree but pushed out of sight, so a script that
+   fills every visible-looking input still trips it. aria-hidden and
+   tabindex="-1" on the markup keep it away from screen readers and the tab
+   order, so nobody using assistive tech can fill it by accident. */
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 /* Bordered panel */
 .panel {
   border: 1px solid var(--nx-border);
@@ -1495,6 +1510,12 @@ em, .accent-em {
   gap: 72px;
   align-items: center;
 }
+/* Grid items default to min-width:auto, which means they refuse to shrink
+   below their content's intrinsic width. On /contact at 360px that let the
+   form panel settle at 360.61px inside a 360px column, making the whole page
+   horizontally scrollable by 1px — enough to rubber-band on iOS. Every other
+   route measured 360 exactly. */
+.split > * { min-width: 0; }
 
 .split.flip .split-media { order: -1; }
 
@@ -1842,8 +1863,16 @@ em, .accent-em {
 .contact-line:last-child { border-bottom: none; }
 .contact-line .ci { flex: none; width: 34px; height: 34px; border: 1px solid var(--nx-border-lit); display: grid; place-items: center; color: var(--nx-accent); }
 .contact-line .ci svg { width: 16px; height: 16px; }
+/* The text column, next to the fixed 34px icon. Flex items default to
+   min-width:auto, so this refused to shrink below the widest unbreakable run
+   it contained — and it contains prabhjeev@nexoviasecuritysolution.com, 37
+   characters of mono with no break opportunity. At 360px that pushed the
+   column to 288.61px in a 288px space and made the whole page scroll
+   horizontally by 1px. Both halves are needed: min-width lets the column
+   shrink, overflow-wrap lets the address itself break. */
+.contact-line > div:not(.ci) { min-width: 0; }
 .contact-line h4 { font-size: 14px; margin-bottom: 4px; }
-.contact-line p, .contact-line a { font-family: var(--mono); font-size: 13px; font-weight: 300; color: var(--text-3); line-height: 1.7; }
+.contact-line p, .contact-line a { font-family: var(--mono); font-size: 13px; font-weight: 300; color: var(--text-3); line-height: 1.7; overflow-wrap: anywhere; }
 .contact-line a:hover { color: var(--nx-accent); }
 
 /* ============================================================

@@ -19,6 +19,26 @@ Cloudflare Pages, served from the repository root.
 Every push to `main` publishes. Because the built files are committed directly,
 Pages does not run a build step.
 
+### Required environment variable
+
+The contact form posts to `functions/api/contact.ts`. Until this is set the
+endpoint returns 503, and the form falls back to opening the visitor's mail
+client — honestly, it tells them it could not send. Nothing breaks without it,
+but enquiries do not reach an inbox on their own.
+
+In **Settings → Environment variables**:
+
+```
+RESEND_API_KEY = <key from resend.com>
+```
+
+Optional: `CONTACT_TO` (defaults to both founders), `CONTACT_FROM`.
+
+Verify **`nexoviasecuritysolution.com`** with Resend — the *singular* domain.
+The site runs on the plural `nexoviasecuritysolutions.com` and mail runs on the
+singular one. That split is deliberate; verifying the wrong one silently breaks
+sending.
+
 ## Where the source lives
 
 The Astro project — pages, components, styles, the WebGL hero and the build

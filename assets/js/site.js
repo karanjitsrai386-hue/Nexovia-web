@@ -177,22 +177,82 @@
   });
 
   /* ---------- Contact form (no backend yet → mailto handoff) ---------- */
-  document.querySelectorAll('form[data-mailto]').forEach(function (form) {
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
+  /* Contact form.
+
+     This used to be mailto-only: build a mailto: URL, navigate to it, then
+     reveal a note. The enquiry therefore only arrived if the visitor had a mail
+     client configured AND pressed send in it — on desktop Chrome with none set
+     up, the click did nothing at all. It now POSTs to a Pages Function and only
+     claims success when that function says so. mailto survives as the fallback
+     for when the endpoint is unconfigured or down. */
+  document.querySelectorAll('form[data-contact]').forEach(function (form) {
+    var btn = form.querySelector('[data-submit]');
+    var label = btn ? btn.textContent : '';
+
+    function show(which) {
+      form.querySelectorAll('.form-msg').forEach(function (m) { m.hidden = true; });
+      var el = form.querySelector('.form-' + which);
+      if (el) el.hidden = false;
+    }
+
+    function mailtoFallback() {
       var to = form.getAttribute('data-mailto');
+      if (!to) return;
       var d = new FormData(form);
       var subject = 'Nexovia demo request — ' + (d.get('company') || d.get('name') || 'new enquiry');
       var body = [];
       d.forEach(function (v, k) {
-        if (String(v).trim()) body.push(k.replace(/_/g, ' ').toUpperCase() + ':\n' + v + '\n');
+        if (k !== 'website' && String(v).trim()) {
+          body.push(k.replace(/_/g, ' ').toUpperCase() + ':\n' + v + '\n');
+        }
       });
       window.location.href = 'mailto:' + to +
         '?subject=' + encodeURIComponent(subject) +
         '&body=' + encodeURIComponent(body.join('\n'));
+    }
 
-      var note = form.querySelector('.form-sent');
-      if (note) note.hidden = false;
+    form.addEventListener('submit', function (e) {
+      /* Let the browser run native validation first — the fields carry
+         `required` and type=email, so there is no reason to reimplement it. */
+      if (!form.checkValidity()) return;
+      e.preventDefault();
+
+      if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+      form.querySelectorAll('.form-msg').forEach(function (m) { m.hidden = true; });
+
+      fetch(form.action, { method: 'POST', body: new FormData(form), headers: { accept: 'application/json' } })
+        .then(function (res) {
+          return res.json().catch(function () { return { ok: res.ok }; });
+        })
+        .then(function (data) {
+          var reason = data && data.reason;
+          if (data && data.ok) {
+            show('ok');
+            form.reset();
+            return;
+          }
+          /* Their input is wrong — do not open a mail client, they should fix
+             the field. In practice native validation catches these first. */
+          if (reason === 'missing-required' || reason === 'bad-email' ||
+              reason === 'too-long' || reason === 'bad-request') {
+            show('err');
+            return;
+          }
+          /* Everything else is our fault, not theirs: no provider key yet,
+             the provider failed, or the function is not deployed and we got a
+             404. In all of those the visitor still deserves a working route,
+             so open the mail client and say plainly that we could not send. */
+          show('fallback');
+          mailtoFallback();
+        })
+        .catch(function () {
+          /* Offline, or the function is not deployed — same honest fallback. */
+          show('fallback');
+          mailtoFallback();
+        })
+        .then(function () {
+          if (btn) { btn.disabled = false; btn.textContent = label; }
+        });
     });
   });
 
