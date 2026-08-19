@@ -24,6 +24,10 @@
 import * as THREE from '../vendor/three.module.js';
 import { RoundedBoxGeometry } from '../vendor/RoundedBoxGeometry.js';
 import { RoomEnvironment } from '../vendor/RoomEnvironment.js';
+import { EffectComposer } from '../vendor/pp/EffectComposer.js';
+import { RenderPass } from '../vendor/pp/RenderPass.js';
+import { UnrealBloomPass } from '../vendor/pp/UnrealBloomPass.js';
+import { OutputPass } from '../vendor/pp/OutputPass.js';
 
 const host = document.querySelector('[data-store-3d]');
 if (host) init(host);
@@ -1052,6 +1056,46 @@ function init(host) {
      one to suit. The framing a phone gets is then the same width of store a
      laptop gets, just taller, which is what the camera path was composed for.
      Above 16:9 nothing changes. */
+  /* ---------- bloom ----------
+
+     The green was flat colour before this: the LED, the light cones and the
+     cable runs were the right hex but did not read as things emitting light.
+
+     No OutputPass in the chain, deliberately. Three applies tone mapping inside
+     each material's fragment shader rather than as a post step, so rendering
+     into the composer's target keeps both the ACES curve on the scene AND the
+     `toneMapped: false` exemption on the brand green. OutputPass would tone-map
+     the whole buffer a second time and desaturate that green to the pale mint
+     the exemption exists to prevent — the exact bug fixed on 2026-08-17.
+
+     Skipped entirely below 720px. Bloom is a full-screen multi-pass blur and a
+     phone GPU pays for it on every frame of a 28-second loop that is decorative
+     — the film still reads without the glow.
+
+     `?nobloom` disables it for A/B comparison without a rebuild. */
+  const wantsBloom =
+    window.innerWidth > 720 &&
+    !/[?&]nobloom\b/.test(location.search) &&
+    !reduce;
+
+  let composer = null;
+  let bloomPass = null;
+  if (wantsBloom) {
+    composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(host.clientWidth || 1, host.clientHeight || 1),
+      /* strength — restrained. The brief is Coram, which glows rather than
+         blooms; past ~0.5 the green cables smear into the shelving. */
+      0.42,
+      /* radius */ 0.5,
+      /* threshold — high enough that the lit floor and the counter stay out of
+         it, so only the accent geometry and the LED actually bloom */
+      0.72
+    );
+    composer.addPass(bloomPass);
+  }
+
   const BASE_FOV = 42;
   const BASE_ASPECT = 16 / 9;
   const HALF_H_FOV = Math.atan(Math.tan((BASE_FOV * Math.PI) / 360) * BASE_ASPECT);
@@ -1072,6 +1116,12 @@ function init(host) {
     const w = host.clientWidth, h = host.clientHeight;
     if (!w || !h) return;
     renderer.setSize(w, h, false);
+    if (composer) {
+      /* the composer owns its own render targets and does not follow
+         renderer.setSize on its own */
+      composer.setSize(w, h);
+      if (bloomPass) bloomPass.setSize(w, h);
+    }
     const aspect = w / h;
     camera.aspect = aspect;
 
@@ -1128,7 +1178,8 @@ function init(host) {
       led.material.color.setRGB(0, b, b * 0.53);
     }
 
-    renderer.render(scene, camera);
+    if (composer) composer.render();
+    else renderer.render(scene, camera);
   }
 
   if ('IntersectionObserver' in window) {
