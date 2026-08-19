@@ -154,12 +154,42 @@
   }
 
   /* ---------- FAQ accordion ---------- */
+  /* FAQ disclosure.
+
+     The markup already carried aria-expanded and aria-controls, so this is not
+     the usual "no ARIA at all" case. The gap was the collapse technique: panels
+     close via `grid-template-rows: 0fr` with `overflow: hidden`, which hides
+     them visually but leaves the content in the accessibility tree. A screen
+     reader still walked all ten answers whether or not they were open.
+
+     `inert` fixes exactly that — it takes the subtree out of the a11y tree and
+     the tab order while leaving it in layout, so the 0fr/1fr height transition
+     still animates. `hidden` would have killed the animation.
+
+     Checked before writing this: there are no anchors or controls inside any
+     panel, so nothing was tab-reachable while closed. This is a screen-reader
+     correctness fix, not a focus-trap fix. */
   document.querySelectorAll('.faq-q').forEach(function (btn) {
+    var panel = document.getElementById(btn.getAttribute('aria-controls'));
+    if (!panel) return;
+    var inner = panel.firstElementChild || panel;
+
+    /* Point the panel back at its question, so a screen reader announcing the
+       region says which one it belongs to. */
+    if (!btn.id) btn.id = btn.getAttribute('aria-controls') + '-q';
+    panel.setAttribute('role', 'region');
+    panel.setAttribute('aria-labelledby', btn.id);
+
+    var set = function (open) {
+      btn.setAttribute('aria-expanded', String(open));
+      panel.classList.toggle('open', open);
+      inner.inert = !open;
+    };
+
+    set(btn.getAttribute('aria-expanded') === 'true');
+
     btn.addEventListener('click', function () {
-      var open = btn.getAttribute('aria-expanded') === 'true';
-      var panel = document.getElementById(btn.getAttribute('aria-controls'));
-      btn.setAttribute('aria-expanded', String(!open));
-      if (panel) panel.classList.toggle('open', !open);
+      set(btn.getAttribute('aria-expanded') !== 'true');
     });
   });
 

@@ -1,0 +1,15 @@
+# Nexovia Security Solutions
+#
+# This file replaces the demo-deploy guard that lived here until launch, which
+# was `Disallow: /` and existed to keep the half-ported site out of search.
+# Deleting that on 2026-08-19 is what made the site indexable; this version is
+# the opposite instruction and is meant to stay.
+
+User-agent: *
+Allow: /
+
+# The API endpoint is a POST handler for the contact form. There is nothing to
+# crawl and a GET returns 405.
+Disallow: /api/
+
+Sitemap: https://nexoviasecuritysolutions.com/sitemap-index.xml
