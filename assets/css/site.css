@@ -1641,6 +1641,18 @@ em, .accent-em {
 .price-card.featured {
   background: linear-gradient(180deg, rgba(0,255,136,0.05) 0%, var(--surface) 42%);
 }
+/* The BorderBeam island animates continuously and has no reduced-motion
+   handling of its own. Everything else on this site does, so it does not get
+   an exemption for being decorative — decoration is exactly what a person with
+   vestibular sensitivity wants stopped. The card keeps its green wash, so the
+   "most sites land here" emphasis survives without the movement.
+
+   Descendant selector, not a child one: Astro wraps a hydrated island in an
+   <astro-island> element, so the beam is a grandchild of the card rather than
+   a direct child. A `>` here silently matched nothing. */
+@media (prefers-reduced-motion: reduce) {
+  .price-card.featured div[class*="pointer-events-none"] { display: none; }
+}
 
 .price-flag {
   position: absolute;

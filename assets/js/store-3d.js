@@ -949,15 +949,33 @@ function init(host) {
   const BASE_ASPECT = 16 / 9;
   const HALF_H_FOV = Math.atan(Math.tan((BASE_FOV * Math.PI) / 360) * BASE_ASPECT);
 
+  /* Holding the horizontal field constant stops the store cropping to a slice,
+     but on a phone it still framed tight: you got the same width of room a
+     laptop gets, in a viewport a third as wide, with the copy overlaid on top
+     of it. There was very little room left to actually see.
+
+     So portrait also pulls back. The factor ramps in as the viewport narrows —
+     nothing at 16:9, up to 1.32x horizontal field by 0.5 aspect (a phone held
+     upright) — rather than switching at a breakpoint, so a tablet rotating
+     through the middle does not jump. */
+  const PORTRAIT_PULLBACK = 1.32;
+  const PULLBACK_FLOOR = 0.5;
+
   function resize() {
     const w = host.clientWidth, h = host.clientHeight;
     if (!w || !h) return;
     renderer.setSize(w, h, false);
     const aspect = w / h;
     camera.aspect = aspect;
-    camera.fov = aspect < BASE_ASPECT
-      ? (2 * Math.atan(Math.tan(HALF_H_FOV) / aspect) * 180) / Math.PI
-      : BASE_FOV;
+
+    if (aspect >= BASE_ASPECT) {
+      camera.fov = BASE_FOV;
+    } else {
+      /* 0 at 16:9, 1 at 0.5 and below */
+      const t = Math.min(1, Math.max(0, (BASE_ASPECT - aspect) / (BASE_ASPECT - PULLBACK_FLOOR)));
+      const halfH = Math.atan(Math.tan(HALF_H_FOV) * (1 + (PORTRAIT_PULLBACK - 1) * t));
+      camera.fov = (2 * Math.atan(Math.tan(halfH) / aspect) * 180) / Math.PI;
+    }
     camera.updateProjectionMatrix();
   }
   resize();
