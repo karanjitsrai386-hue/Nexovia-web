@@ -738,6 +738,38 @@ em, .accent-em {
   overflow: hidden;
 }
 
+/* A real product capture sitting inside a copy column, with a caption saying
+   what it is. Distinct from .det-video, which is the full-bleed evidence media
+   in the other half of a .split. */
+.cap-shot { margin: 0; }
+.cap-shot img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid var(--nx-border-lit);
+}
+
+/* A phone screenshot is roughly 1:1.65, so at the full width of a column it
+   renders a metre tall — measured at 644x1062 inside a copy column and 602x926
+   in a split, dwarfing the text beside it. Cap the width so it reads as a
+   phone rather than a poster. */
+.shot-phone img,
+img.shot-phone {
+  max-width: 320px;
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid var(--nx-border-lit);
+}
+.cap-shot figcaption {
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--text-4);
+}
+
 /* Bordered panel */
 .panel {
   border: 1px solid var(--nx-border);
