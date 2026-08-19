@@ -935,11 +935,29 @@ function init(host) {
     }
   }
 
+  /* The camera's 42 is a VERTICAL fov, so leaving it fixed means the
+     horizontal field shrinks with the aspect ratio. On a phone held upright
+     (390x726, aspect 0.54) that cropped the store to a narrow vertical slice —
+     the shot was mostly empty floor and ceiling with the shelves and the
+     counter pushed off both sides. It read as a dark wedge, not a room.
+
+     So below 16:9 we hold the HORIZONTAL field constant and widen the vertical
+     one to suit. The framing a phone gets is then the same width of store a
+     laptop gets, just taller, which is what the camera path was composed for.
+     Above 16:9 nothing changes. */
+  const BASE_FOV = 42;
+  const BASE_ASPECT = 16 / 9;
+  const HALF_H_FOV = Math.atan(Math.tan((BASE_FOV * Math.PI) / 360) * BASE_ASPECT);
+
   function resize() {
     const w = host.clientWidth, h = host.clientHeight;
     if (!w || !h) return;
     renderer.setSize(w, h, false);
-    camera.aspect = w / h;
+    const aspect = w / h;
+    camera.aspect = aspect;
+    camera.fov = aspect < BASE_ASPECT
+      ? (2 * Math.atan(Math.tan(HALF_H_FOV) / aspect) * 180) / Math.PI
+      : BASE_FOV;
     camera.updateProjectionMatrix();
   }
   resize();
