@@ -1602,55 +1602,24 @@ img.shot-ui {
   .scrub-reg, .scrub-rule { display: none; }
 }
 
-/* ---- 5.7 the light inversion chapter ----
+/* ---- 5.7 the light inversion chapter — BUILT, THEN REVERTED 2026-08-19 ----
 
-   ONE inverted chapter site-wide, on "Keep every camera you already paid for",
-   because that is the one section about the world OUTSIDE the box. The
-   reference flips to black exactly where the case comes off and you are looking
-   at the movement: outside light, inside dark. Ours runs the same logic in
-   reverse, since our resting state is dark.
+   The rules that were here re-grounded one homepage band to a light palette by
+   swapping --bg / --text / --nx-border / the accent tiers on a single element.
+   It worked and it measured clean (h2 18.3:1, body 10.8:1, button 6.2:1), but
+   the client cut it, and the plan had explicitly offered that cut.
 
-   Done as a TOKEN SWAP, not a restyle. Every rule in this sheet already reads
-   --bg / --text / --nx-border, so redefining those on one element re-grounds
-   everything inside it and no child needs touching. That is Phase 7's rule
-   ("never hand-style during a port") applied to a colour change.
+   The reason it did not land is worth keeping: Phase 7 argues premium reads as
+   restraint rather than lightness, and that Coram and Verkada look like each
+   other precisely BECAUSE they are both light. One white band in a long dark
+   scroll read as a break in the system rather than a deliberate chapter.
 
-   The gate the plan set: #00ff88 on white is unreadable — measured 1.5:1, well
-   under the 4.5:1 floor. So --nx-accent becomes --nx-accent-deep here, and the
-   structural tiers darken with it. */
-.band-invert {
-  --bg:            #f2f5f3;
-  --surface:       #e6ebe8;
-  --text:          #080b0e;
-  --text-2:        #303840;
-  --text-3:        #4e575f;
-  --text-4:        #69727a;
-  --heading:       #05080b;
-  --nx-border:     rgba(8, 11, 14, 0.14);
-  --nx-border-lit: rgba(8, 11, 14, 0.30);
-  /* --nx-accent-deep (#00c46a) is the plan's named replacement for the neon,
-     and it is right for fills — but as TEXT on this ground it measures ~2.1:1,
-     so it cannot carry links or eyebrows. The three tiers darken instead, and
-     keep the same job separation they have on dark: action / structure /
-     metadata. #04693e on #f2f5f3 is ~5.4:1. */
-  --nx-accent:     #04693e;
-  --nx-accent-mid: #2a7a55;
-  --nx-accent-low: #4a8f6e;
-  --nx-accent-glow: rgba(0, 150, 80, 0.12);
-  --nx-accent-film: rgba(0, 150, 80, 0.05);
+   Removed rather than commented out — a full alternate palette left dormant in
+   the sheet is a trap for whoever next adds a class called "invert".
 
-  background: var(--bg);
-  color: var(--text);
-}
-
-/* Optical correction, not a restyle. The site sets prose at weight 300, which
-   carries on a near-black ground because light type on dark optically gains
-   weight. Invert the ground and the same 300 goes thin and patchy — the strokes
-   lose mass against the paper rather than bleeding into it. One step up
-   restores the texture the dark bands have. */
-.band-invert .body-copy,
-.band-invert .check-list li,
-.band-invert p { font-weight: 400; }
+   The one thing kept is the --heading token in :root. h1-h4 and .spec-v strong
+   hardcoded #fff, so no heading could follow ANY change of ground; this band
+   is what exposed that, but the fix stands on its own. */
 
 /* ---- 5.2 the pinned signal path ---- */
 .flow-pin {
