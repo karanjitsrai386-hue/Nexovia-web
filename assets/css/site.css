@@ -445,10 +445,17 @@ em, .accent-em {
 }
 .head-stat b i { font-style: normal; font-size: 0.34em; color: var(--nx-accent); letter-spacing: 0; }
 
+/* 12.5px floor, set 2026-08-20. These four are not decorative micro-type:
+   they are what a visitor reads to work out what they are looking at. The
+   census found 351 elements under 12px site-wide, and the same 288 stay under
+   12px at 390px wide, so they are smallest exactly where they are hardest to
+   read. Tracking comes down with the size — 0.18em on an 11px mono label
+   stretches a word without making it more legible. Genuinely decorative
+   micro-type is left alone. */
 .head-stat span {
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  font-size: 12.5px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-3);
 }
@@ -622,28 +629,31 @@ img.shot-phone {
 
    The wrapper is what draws the frame — an <img> cannot carry pseudo-elements,
    so the markup needs the extra element. */
-/* A real phone is 9:19.5. These captures are not — nx_app_guard is 0.611,
-   nx_app_fall 0.650, nx_app_deterrence 0.493 — so a frame sized to the image
-   came out at 0.626, which is tablet proportions. That mismatch is what made
-   the screen inside read as badly cropped: the eye expects a taller device and
-   scores the difference as missing interface.
+/* The screen takes the shape of the capture inside it.
 
-   The screen is a 9:17 box now and the capture is contained inside it,
-   anchored to the bottom. Bottom-anchored because that is where the parts that
-   must not move live — nx_app_guard ends on its tab bar, and the two is-cut
-   captures end on their severed edge, which the fade below exists to hide. The
-   letterbox that opens at the top is the image's own background colour
-   (#0a100e, sampled from the top row of both full-height captures), so it reads
-   as the dark head of the screen rather than a gap. 9:17 rather than a
-   flagship 9:19.5 because the four candidates were rendered and compared: at
-   19.5 the letterbox is a quarter of the screen and reads as a void, at 16 the
-   device goes squat again. 17 keeps phone proportions and leaves a band that
-   passes for a status area.
+   Earlier on 2026-08-20 this was a fixed 9:17 box with the capture contained
+   inside, on the argument that the leftover band would "read as the dark head
+   of the screen rather than a gap". Measured, it does not. The three captures
+   are three different shapes — nx_app_guard 0.611, nx_app_fall 0.650,
+   nx_app_deterrence 0.493 — and one fixed box cannot fit any two of them:
 
-   This is a presentation fix, not a substitute for full-height captures from
-   the app. Re-export at true phone resolution and --screen-ratio can go. */
+     /            80px of dead band across the top   (13% of the screen)
+     /pilot      111px of dead band across the top   (18% of the screen)
+     /capabilities  22px down the left AND right edges — a pillarbox, which
+                    never reads as a phone at all
+
+   `contain` shows the whole image inside the box, so anything that is not the
+   box's shape buys empty space. `cover` fills it but crops the sides, and
+   these captures are tight enough that 24px each side clips real interface
+   ("Sites" to "ites", "Home" to "ome"). Letting each screen take its own
+   capture's shape costs nothing and loses nothing: one phone per page, so the
+   slight difference in device proportion between pages is never seen side by
+   side.
+
+   The images carry width/height attributes so the box is still reserved
+   before a lazy image lands. Still not a substitute for full-height captures
+   from the app — that is what makes every phone the same shape again. */
 .phone-frame {
-  --screen-ratio: 9 / 17;
   --screen-bg: #0a100e;
   position: relative;
   max-width: 340px;
@@ -662,10 +672,8 @@ img.shot-phone {
 .phone-frame img.shot-phone {
   display: block;
   width: 100%;
-  max-width: none;        /* the frame owns the width now, not the image */
-  aspect-ratio: var(--screen-ratio);
-  object-fit: contain;
-  object-position: bottom;
+  max-width: none;        /* the frame owns the width, the capture the height */
+  height: auto;
   border: 0;
   border-radius: 33px;
   background: var(--screen-bg);
@@ -895,7 +903,8 @@ img.shot-ui {
   gap: 20px;
   flex-wrap: wrap;
   font-family: var(--mono);
-  font-size: 11.5px;
+  /* on all ten pages, and one of the three items is the CalOPPA privacy link */
+  font-size: 12px;
   letter-spacing: 0.12em;
   color: var(--text-3);
 }
@@ -1303,6 +1312,18 @@ img.shot-ui {
   --p: 0;
   position: relative;
   height: 340vh;
+}
+
+/* While a rig is being scrubbed, stop everything looping inside it.
+
+   The signal path carries 31 infinite SVG animations in the same subtree whose
+   --p is rewritten on every scroll frame, so each frame invalidated both and
+   the scrub dropped 69% of its frames on a 6x-throttled CPU. Paused for the
+   length of the gesture that is 24%. The attribute is set by the rig driver in
+   hive-explode.js and cleared 140ms after scrolling stops. Costs nothing on
+   /hive, which has nothing animating inside its rig to pause. */
+.scrub[data-scrubbing] svg * {
+  animation-play-state: paused;
 }
 
 .scrub-stage {
@@ -2031,8 +2052,8 @@ img.shot-ui {
   padding: 26px 30px;
   border-right: 1px solid var(--nx-border);
   font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.18em;
+  font-size: 12.5px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--nx-accent-mid);
   display: flex;
@@ -2079,7 +2100,7 @@ img.shot-ui {
   padding: 26px 30px;
   border-left: 1px solid var(--nx-border);
   font-family: var(--mono);
-  font-size: 11.5px;
+  font-size: 12px;
   letter-spacing: 0.12em;
   color: var(--text-3);
   display: flex;
@@ -2254,7 +2275,7 @@ img.shot-ui {
 .cmp { width: 100%; border-collapse: collapse; border: 1px solid var(--nx-border); font-family: var(--mono); }
 .cmp th, .cmp td { padding: 17px 22px; border-bottom: 1px solid var(--nx-border); text-align: left; font-size: 13px; font-weight: 300; }
 .cmp thead th {
-  font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+  font-size: 12.5px; letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--nx-accent); font-weight: 400; background: var(--surface);
   border-bottom: 1px solid var(--nx-border-lit);
 }
@@ -2348,13 +2369,22 @@ img.shot-ui {
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
 .field-full { grid-column: 1 / -1; }
 
+/* The label has to beat the placeholder, and it was losing.
+
+   Measured 2026-08-20: label 11px at 5.32:1, placeholder 14px at 4.27:1. The
+   placeholder was 27% larger than the thing naming it, in near enough the same
+   contrast, carrying realistic content ("Jane Okafor", "Okafor Auto Parts") —
+   so each field read as already filled in, on the one page that asks a visitor
+   to do work. The label is now bigger than it was, brighter, and less
+   stretched; the placeholder is dimmer than the label and clears AA (see
+   ::placeholder below). */
 .field label {
   display: block;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
+  font-size: 13px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--text-3);
+  color: var(--text-2);
   margin-bottom: 10px;
 }
 
@@ -2379,7 +2409,11 @@ img.shot-ui {
   background: var(--surface-2);
 }
 
-.field input::placeholder, .field textarea::placeholder { color: var(--text-4); }
+/* --text-4 measured 4.27:1 on the field fill — below AA, and placeholder text
+   is text. The 2026-08-20 contrast probe missed it because ::placeholder is a
+   pseudo-element and that probe walks real elements only. --text-3 clears 4.5
+   and still sits a clear step below the label above it. */
+.field input::placeholder, .field textarea::placeholder { color: var(--text-3); }
 
 .field select {
   appearance: none;
@@ -2619,7 +2653,7 @@ img.shot-ui {
 .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: auto; }
 .chips span {
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: 12px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-3);

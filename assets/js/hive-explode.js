@@ -395,7 +395,37 @@
       paintChapters(rig, p, flat);
     });
   }
-  function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+  /* ---------- pause the loops while the rig is being scrubbed ----------
+
+     Measured on a 6x-throttled CPU, the homepage signal path dropped 69% of
+     its frames during a scrub: 2,085ms of style recalculation and 499ms of
+     layout against 259ms of script. It is not the scrubbing that costs — the
+     teardown on /hive rewrites --p over 223 descendants the same way and holds
+     3-5%. The difference is that the signal path has 31 infinite SVG
+     animations (dashmove, blink, bargrow) living inside the very subtree whose
+     custom property is being rewritten every frame, so each frame invalidates
+     both. Pausing them for the duration of the scrub takes 69% down to 24%.
+
+     140ms of idle before resuming: long enough to cover the gap between wheel
+     events in one gesture, short enough that the diagram is moving again
+     before anyone has finished looking back at it. */
+  var scrubbing = false;
+  var idleTimer;
+  function setScrubbing(on) {
+    if (scrubbing === on) return;
+    scrubbing = on;
+    rigs.forEach(function (rig) {
+      if (on) rig.setAttribute('data-scrubbing', '');
+      else rig.removeAttribute('data-scrubbing');
+    });
+  }
+
+  function onScroll() {
+    setScrubbing(true);
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(function () { setScrubbing(false); }, 140);
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll, { passive: true });
   if (mqSmall.addEventListener) {
