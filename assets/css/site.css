@@ -769,6 +769,84 @@ img.shot-phone {
   border: 1px solid var(--nx-border-lit);
 }
 
+/* ---- phone frame ----
+   App screenshots read as screenshots until you put a device around them. The
+   film does this for every phone panel it shows; the site was presenting bare
+   screens with a 1px rule, which is why they looked like cropped images rather
+   than a product.
+
+   Deliberately no notch or dynamic island. The three screenshots do not start
+   at the same place: nx_app_deterrence carries a real status bar (2:06 / 5G /
+   87) where a notch would sit correctly, but nx_app_fall starts at
+   "Sites / Guard", so a pill there would sit on top of the title. A clean bezel
+   reads as a device on all of them and covers nothing.
+
+   The wrapper is what draws the frame — an <img> cannot carry pseudo-elements,
+   so the markup needs the extra element. */
+.phone-frame {
+  position: relative;
+  max-width: 340px;
+  width: 100%;
+  margin-inline: auto;
+  padding: 11px;
+  border-radius: 44px;
+  background: linear-gradient(158deg, #1b212a 0%, #0d1116 46%, #070a0e 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    0 26px 54px -22px rgba(0, 0, 0, 0.9);
+}
+.phone-frame img,
+.phone-frame .shot-phone,
+.phone-frame img.shot-phone {
+  display: block;
+  width: 100%;
+  max-width: none;      /* the frame owns the width now, not the image */
+  height: auto;
+  border: 0;
+  border-radius: 33px;
+  background: #05070a;
+}
+/* Two of the three app captures stop mid-card: nx_app_deterrence ends just
+   after the Evidence row and nx_app_fall just after Notify, because that is
+   all the source had. Presented flat they read as badly cropped pictures.
+
+   Faded at the bottom they read as what they actually are — a screen with more
+   below the fold. Opt-in, because nx_app_guard ends on its tab bar and is
+   complete; fading that one would hide real UI.
+
+   The proper fix is a full-height re-export of both screens. This is the
+   honest presentation of what exists today, not a substitute for that. */
+.phone-frame.is-cut { position: relative; }
+.phone-frame.is-cut::before {
+  content: '';
+  position: absolute;
+  left: 11px; right: 11px; bottom: 11px;
+  height: 78px;
+  border-radius: 0 0 33px 33px;
+  background: linear-gradient(to bottom, rgba(5, 7, 10, 0) 0%, rgba(5, 7, 10, 0.86) 72%, rgba(5, 7, 10, 0.97) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* side button — the one piece of device detail worth keeping, because it is
+   what stops the frame reading as a plain rounded rectangle */
+.phone-frame::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: 22%;
+  width: 3px;
+  height: 62px;
+  border-radius: 3px;
+  background: var(--nx-accent-low);
+  opacity: 0.8;
+}
+@media (max-width: 720px) {
+  .phone-frame { max-width: 290px; border-radius: 38px; padding: 9px; }
+  .phone-frame img { border-radius: 29px; }
+}
+
 /* For a crop of part of an interface rather than a whole phone. Same border,
    no width cap — .shot-phone put this one at 320px in a 644px column, leaving
    half the column empty, because the aspect is near-square rather than 1:1.65. */
@@ -1961,21 +2039,17 @@ img.shot-ui {
   object-fit: cover;
 }
 
-/* The deterrence camera is mounted inverted, so the clip comes off it upside
-   down. The reference cut (out/final/Nexovia_Guard_Demo.mp4, scenario 4
-   "Automated Flash Deterrence") rotates the picture 180 to put the scene the
-   right way up, which is why the burned-in timestamp reads mirrored there —
-   the overlay was baked in before the correction.
+/* The CSS 180 rotation that lived here is gone, and deliberately so.
 
-   The site was shipping the raw orientation: pool at the bottom, patio
-   inverted, both people upside down, and only the burned-in text the right way
-   round. Rotating here matches the film. It also flips the poster frame, since
-   the poster is painted by the same <video> box.
+   It corrected demo_deterence2.mp4, which came off an inverted camera mount and
+   was never rotated at source. The client then supplied "detection new.mp4",
+   which IS corrected at source — pool at the top, both people upright, and the
+   burned-in overlay mirrored as a consequence. Rotating that would have put it
+   back upside down.
 
-   Doing it in CSS rather than re-encoding because there is no ffmpeg on this
-   machine; if the clip is ever re-exported, correct it at source and drop the
-   attribute rather than stacking two rotations. */
-.det-video video[data-flip180] { transform: rotate(180deg); }
+   The rule is removed rather than left inert: an unused transform keyed to an
+   attribute is exactly the kind of thing that gets re-applied by accident to
+   the next clip someone drops in. */
 
 .det-panel { padding: 40px 36px; display: flex; flex-direction: column; }
 
