@@ -24,10 +24,6 @@
 import * as THREE from '../vendor/three.module.js';
 import { RoundedBoxGeometry } from '../vendor/RoundedBoxGeometry.js';
 import { RoomEnvironment } from '../vendor/RoomEnvironment.js';
-import { EffectComposer } from '../vendor/pp/EffectComposer.js';
-import { RenderPass } from '../vendor/pp/RenderPass.js';
-import { UnrealBloomPass } from '../vendor/pp/UnrealBloomPass.js';
-import { OutputPass } from '../vendor/pp/OutputPass.js';
 
 const host = document.querySelector('[data-store-3d]');
 if (host) init(host);
@@ -299,13 +295,28 @@ function init(host) {
     ports.push(p);
   }
 
-  /* ---------- aisle shelving ---------- */
+  /* ---------- aisle shelving ----------
+
+     Built as a double-sided gondola: decks cantilevered off ONE spine down the
+     middle, both long faces open.
+
+     It used to be the other way round — two 0.06 x 1.8 x 5.0 skins down the
+     OUTSIDE of each unit, at cx ± 0.47. That sealed the goods in behind a pair
+     of solid five-metre walls and occluded everything past them, which is what
+     the client saw: "why is there like a wall blocking the people with the
+     goods". It also made no sense as shop fitting — you could not have reached
+     the stock, and the browse animation reaches toward a shelf face that was
+     boarded over.
+
+     The spine is thin (0.04) and sits at cx, between the two stock rows at
+     cx-0.22 and cx+0.16, so it clears the goods at their widest. It stops at
+     1.62, just above the top deck at 1.37, so the unit still reads as a solid
+     run from the side without walling off the aisle beyond it. */
   function shelf(cx, cz) {
     boxAt(1.0, 0.08, 5.0, cx, 0.05, cz, 0x1e2833);
     boxAt(1.0, 0.06, 5.0, cx, 0.72, cz, 0x222d39);
     boxAt(1.0, 0.06, 5.0, cx, 1.34, cz, 0x222d39);
-    boxAt(0.06, 1.8, 5.0, cx - 0.47, 0.9, cz, 0x27323e);
-    boxAt(0.06, 1.8, 5.0, cx + 0.47, 0.9, cz, 0x27323e);
+    boxAt(0.04, 1.62, 5.0, cx, 0.81, cz, 0x27323e);
   }
   shelf(-1.4, 0.2);
   shelf(2.2, 0.2);
@@ -442,7 +453,13 @@ function init(host) {
   const LOOKS = {
     /* a shopper and a member of staff, not the same figure twice */
     shopper: { shirt: 0x8b95a2, trouser: 0x2a323d, skin: 0xa8907f, shoe: 0x14181e, hair: 0x241d18, tall: 1.02  },
-    subject: { shirt: 0x5b6572, trouser: 0x2f2b27, skin: 0x8b7159, shoe: 0x121417, hair: 0x14100d, tall: 0.965 }
+    subject: { shirt: 0x5b6572, trouser: 0x2f2b27, skin: 0x8b7159, shoe: 0x121417, hair: 0x14100d, tall: 0.965 },
+    /* Background shoppers. Three more sets so the floor is not the same two
+       figures repeated — height and skin vary as much as clothing, because a
+       crowd of one build reads as clones however you dress it. */
+    browseA: { shirt: 0x6f7a86, trouser: 0x232a33, skin: 0x6b4f3a, shoe: 0x14181e, hair: 0x120e0a, tall: 1.06 },
+    browseB: { shirt: 0x9aa3ae, trouser: 0x3a3630, skin: 0xc0a58e, shoe: 0x1a1d22, hair: 0x4a3a28, tall: 0.94 },
+    browseC: { shirt: 0x7b8592, trouser: 0x272f39, skin: 0x8f6f52, shoe: 0x161a20, hair: 0x1d1712, tall: 1.0  }
   };
   function wardrobe(look) {
     return {
@@ -623,6 +640,46 @@ function init(host) {
   const faller = makePerson(-2.95, 1.10, -0.6, LOOKS.shopper);
   const thief  = makePerson(0.42, 0.55, 0.7, LOOKS.subject);
 
+  /* ---------- background shoppers ----------
+
+     The shop had stock but nobody in it, so the two incidents were the only
+     human activity in the film. That made them read as "here is a person" when
+     they need to read as "here is a person doing something wrong" — a fall and
+     a theft only land as deviation if there is a normal to deviate from.
+
+     Placed in the three clear lanes and well away from both actors and the
+     camera path: shelves occupy x -1.9..-0.9 and 1.7..2.7, the faller is at
+     z 1.10 in the left lane and the thief at z 0.55 in the middle.
+
+     Idle only — a weight shift, a slow head turn, an arm that moves as if
+     reaching a shelf. Nobody walks. Walk cycles on figures this simple read as
+     a shuffle, and the eye should go to the incident, not to the extras. */
+  const browsers = [
+    { p: makePerson(-2.90, -1.65, 3.1, LOOKS.browseA), face: 0.9,  rate: 0.42, phase: 0.0 },
+    { p: makePerson( 1.05, -1.15, 5.7, LOOKS.browseB), face: -1.4, rate: 0.31, phase: 2.1 },
+    { p: makePerson( 3.35,  0.95, 8.3, LOOKS.browseC), face: 2.4,  rate: 0.37, phase: 4.3 }
+  ];
+  browsers.forEach((b) => { b.p.g.rotation.y = b.face; });
+
+  function idleBrowsers(t) {
+    for (const b of browsers) {
+      const s = t * b.rate + b.phase;
+      const who = b.p;
+      /* weight shifting foot to foot, and the torso following it a beat later */
+      who.g.rotation.y = b.face + Math.sin(s * 0.6) * 0.09;
+      who.torso.rotation.z = who.rest.torsoZ + Math.sin(s * 0.6 - 0.5) * 0.035;
+      who.head.rotation.y = Math.sin(s * 0.44 + 1.2) * 0.42;
+      who.head.rotation.x = Math.sin(s * 0.29) * 0.1;
+      /* the near arm lifts toward the shelf now and then, and holds there —
+         smoothstep on a slow sine so it does not look like a metronome */
+      const raw = (Math.sin(s * 0.35) + 1) / 2;
+      const reach = raw * raw * (3 - 2 * raw);
+      who.armR.rotation.x = -reach * 1.05;
+      who.elbowR.rotation.x = -reach * 0.7;
+      who.armL.rotation.x = Math.sin(s * 0.6 + 3.1) * 0.06;
+    }
+  }
+
   /* ---------- detection boxes ---------- */
   function detBox(w, h, d, text, hex) {
     const g = new THREE.Group();
@@ -713,6 +770,20 @@ function init(host) {
     ring.rotation.x = -Math.PI / 2;
     scene.add(ring);
     c.ring = ring;
+
+    /* Filled footprint inside the ring. The ring alone drew an outline the eye
+       read as a decorative circle; the fill is what makes it read as an area
+       this camera is covering. Sits a hair under the ring so the two do not
+       z-fight on the floor plane, and stays faint — it is ground the shopper
+       walks over, not a light. */
+    const disc = new THREE.Mesh(
+      new THREE.CircleGeometry(0.88, 40),
+      new THREE.MeshBasicMaterial({ color: ACCENT, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false })
+    );
+    disc.position.set(c.look.x, 0.015, c.look.z);
+    disc.rotation.x = -Math.PI / 2;
+    scene.add(disc);
+    c.disc = disc;
   });
 
   /* ---------- cabling ----------
@@ -958,11 +1029,20 @@ function init(host) {
       const gf = W_(t, r.from, r.to);
       r.glowGeo.setDrawRange(0, Math.floor(r.glowTotal * gf));
 
+      /* Coverage read, raised 2026-08-19 — the client could not tell what each
+         camera actually watches.
+
+         The weight goes on the FLOOR footprint, not the volume. The cone is the
+         part that turned into vivid green slabs under bloom, so it only comes up
+         from 0.075 to 0.115; the disc and ring carry the meaning instead, and
+         being flat on the floor they cannot stack into a haze the way overlapping
+         cones do. */
       const live = gf >= 0.999;
       if (r.cam) {
         r.cam.led.visible = live;
-        r.cam.cone.material.opacity = live ? 0.075 : 0;
-        r.cam.ring.material.opacity = live ? 0.26 : 0;
+        r.cam.cone.material.opacity = live ? 0.115 : 0;
+        r.cam.ring.material.opacity = live ? 0.5 : 0;
+        r.cam.disc.material.opacity = live ? 0.075 : 0;
       }
       if (r.dot) r.dot.visible = live;
     });
@@ -1056,46 +1136,6 @@ function init(host) {
      one to suit. The framing a phone gets is then the same width of store a
      laptop gets, just taller, which is what the camera path was composed for.
      Above 16:9 nothing changes. */
-  /* ---------- bloom ----------
-
-     The green was flat colour before this: the LED, the light cones and the
-     cable runs were the right hex but did not read as things emitting light.
-
-     No OutputPass in the chain, deliberately. Three applies tone mapping inside
-     each material's fragment shader rather than as a post step, so rendering
-     into the composer's target keeps both the ACES curve on the scene AND the
-     `toneMapped: false` exemption on the brand green. OutputPass would tone-map
-     the whole buffer a second time and desaturate that green to the pale mint
-     the exemption exists to prevent — the exact bug fixed on 2026-08-17.
-
-     Skipped entirely below 720px. Bloom is a full-screen multi-pass blur and a
-     phone GPU pays for it on every frame of a 28-second loop that is decorative
-     — the film still reads without the glow.
-
-     `?nobloom` disables it for A/B comparison without a rebuild. */
-  const wantsBloom =
-    window.innerWidth > 720 &&
-    !/[?&]nobloom\b/.test(location.search) &&
-    !reduce;
-
-  let composer = null;
-  let bloomPass = null;
-  if (wantsBloom) {
-    composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(host.clientWidth || 1, host.clientHeight || 1),
-      /* strength — restrained. The brief is Coram, which glows rather than
-         blooms; past ~0.5 the green cables smear into the shelving. */
-      0.42,
-      /* radius */ 0.5,
-      /* threshold — high enough that the lit floor and the counter stay out of
-         it, so only the accent geometry and the LED actually bloom */
-      0.72
-    );
-    composer.addPass(bloomPass);
-  }
-
   const BASE_FOV = 42;
   const BASE_ASPECT = 16 / 9;
   const HALF_H_FOV = Math.atan(Math.tan((BASE_FOV * Math.PI) / 360) * BASE_ASPECT);
@@ -1116,12 +1156,6 @@ function init(host) {
     const w = host.clientWidth, h = host.clientHeight;
     if (!w || !h) return;
     renderer.setSize(w, h, false);
-    if (composer) {
-      /* the composer owns its own render targets and does not follow
-         renderer.setSize on its own */
-      composer.setSize(w, h);
-      if (bloomPass) bloomPass.setSize(w, h);
-    }
     const aspect = w / h;
     camera.aspect = aspect;
 
@@ -1176,10 +1210,12 @@ function init(host) {
       });
       const b = 0.55 + Math.sin(raw * 3.1) * 0.45;
       led.material.color.setRGB(0, b, b * 0.53);
+      /* the extras keep browsing all the way through the loop; they are the
+         "normal" the fall and the theft are a departure from */
+      idleBrowsers(clock.elapsedTime);
     }
 
-    if (composer) composer.render();
-    else renderer.render(scene, camera);
+    renderer.render(scene, camera);
   }
 
   if ('IntersectionObserver' in window) {

@@ -279,9 +279,42 @@
 
 '</svg>';
 
+  /* The six callouts again, as data. The SVG draws them at x=1038 with leader
+     lines, which is why the artwork needs 1500 units of width and why the phone
+     layout used to scroll sideways through 1040px of it — you landed on empty
+     margin and never saw a label. Below 900px these render as an ordinary list
+     under a diagram that fits the screen instead. */
+  var PARTS = [
+    ['01', 'Top shell', 'Fan window · sealed'],
+    ['02', 'Blower', 'Active cooling · PWM'],
+    ['03', 'Heatsink', 'Die-cast fin stack'],
+    ['04', 'Jetson Orin Nano', '69.6 × 45 mm SO-DIMM · 1024-core GPU'],
+    ['05', 'Carrier board', '100 × 79 mm · GbE · M.2 · 40-pin'],
+    ['06', 'Base tray', 'Black shell · wall / DIN mount']
+  ];
+
+  var list = '<ol class="xl-list">' + PARTS.map(function (p) {
+    return '<li><b>' + p[0] + '</b><span><strong>' + p[1] + '</strong>' + p[2] + '</span></li>';
+  }).join('') + '</ol>';
+
   var hosts = document.querySelectorAll('[data-hive-explode], [data-hive-still]');
   if (!hosts.length) return;
-  hosts.forEach(function (h) { h.innerHTML = svg; });
+  hosts.forEach(function (h) { h.innerHTML = svg + list; });
+
+  /* The viewBox has to change with the breakpoint — CSS cannot touch it, and a
+     transform would scale the labels back into the frame along with the art.
+     Cropping to the left 1000 units drops the label column entirely, so the
+     stack itself can fill a phone screen at a readable size. */
+  var FULL = '0 0 1500 1360';
+  var CROP = '150 0 850 1360';
+  function fitViewBox() {
+    var small = window.innerWidth <= 900;
+    document.querySelectorAll('.xl-svg').forEach(function (s) {
+      s.setAttribute('viewBox', small ? CROP : FULL);
+    });
+  }
+  fitViewBox();
+  window.addEventListener('resize', fitViewBox);
 
   var rigs = [].slice.call(document.querySelectorAll('.scrub'));
   if (!rigs.length) return;
