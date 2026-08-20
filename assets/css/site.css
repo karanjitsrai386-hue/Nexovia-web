@@ -817,17 +817,29 @@ img.shot-ui {
 
 /* ---------- Reveal animation ---------- */
 
+/* 0.55s, down from 0.9s (and 0.72s from 1.15s in .band-lg).
+
+   The rest of the site answers in 0.2-0.3s — buttons, links, tabs, the nav
+   background. A reveal taking three to four times that reads as the page
+   still loading rather than as the page arriving, and it is worst on the
+   thing it matters most for: 15 of these are the page heading, which is the
+   first thing a reader looks for and was taking the best part of a second to
+   turn up. The travel comes down with the duration so the movement keeps the
+   same speed rather than becoming a lurch.
+
+   The 0.07s stagger ladder below is unchanged; it reads better against a
+   shorter reveal, not worse. */
 .rv {
   opacity: 0;
-  transform: translateY(34px);
-  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+  transform: translateY(26px);
+  transition: opacity 0.55s var(--ease), transform 0.55s var(--ease);
 }
 .rv.in { opacity: 1; transform: none; }
 
-.rv-l  { transform: translateX(-30px); }
-.rv-r  { transform: translateX(30px); }
-.rv-sc { transform: scale(0.965) translateY(20px); }
-.band-lg .rv { transform: translateY(56px); transition-duration: 1.15s; }
+.rv-l  { transform: translateX(-24px); }
+.rv-r  { transform: translateX(24px); }
+.rv-sc { transform: scale(0.972) translateY(16px); }
+.band-lg .rv { transform: translateY(40px); transition-duration: 0.72s; }
 
 .d1 { transition-delay: 0.07s; }
 .d2 { transition-delay: 0.14s; }
@@ -1561,7 +1573,14 @@ img.shot-ui {
   max-height: 0;
   opacity: 0;
   overflow: hidden;
-  transition: max-height 0.45s var(--ease), opacity 0.35s var(--ease), font-size 0.45s var(--ease);
+  /* font-size is deliberately NOT transitioned. Tweening it relays out the
+     text on every frame of the transition, on five paragraphs, inside the
+     pinned rail — and it fires exactly when a chapter changes, which is the
+     busiest moment of the scrub. The step down to 13px still happens, it just
+     lands rather than tweens, and under a moving stage nobody can tell.
+     max-height stays: see the note above on why grid-template-rows cannot
+     collapse a bare text node. */
+  transition: max-height 0.45s var(--ease), opacity 0.35s var(--ease);
 }
 /* arrived — and it stays arrived */
 .flow-rail .leg.is-live > p  { max-height: 9em; opacity: 1; }
