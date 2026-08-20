@@ -15,14 +15,26 @@
   --nx-border-lit:  #29323f;
 
   /* Text */
-  /* Contrast against --bg #05070a, WCAG 2.1:
-     text   #e3e8f0 → 16.2:1   text-2 #98a2b1 → 7.8:1
-     text-3 #737d8c →  4.8:1   (AA body text — carries card/legend copy)
-     text-4 #5c6675 →  3.5:1   (AA large / decorative micro-labels only) */
+  /* Contrast, WCAG 2.1. Two ratios per token, because this site puts copy on
+     two grounds: the page --bg #05070a and raised cards --nx-border #1a212b.
+     A token rated only against the page silently fails on a card.
+
+                        on #05070a   on #1a212b
+     text   #e3e8f0        16.2:1       13.1:1
+     text-2 #98a2b1         7.8:1        6.3:1
+     text-3 #7e8897         5.6:1        4.5:1   (body + card/legend copy)
+     text-4 #6e7887         4.5:1        3.6:1   (micro-labels, page ground only)
+
+     text-3 was #737d8c and text-4 #5c6675, rated 4.8 and 3.5 against the page
+     alone. The 2026-08-20 audit measured every live use: text-4 was carrying
+     10–14px eyebrows and micro-labels on all ten pages at 3.47:1, never the
+     "AA large" its old note reserved it for — not one use qualified. And
+     text-3 dropped to 3.89:1 wherever a card sat under it. Both are lifted to
+     clear 4.5:1 in the ground each actually sits on. Keep text-4 off cards. */
   --text:        #e3e8f0;
   --text-2:      #98a2b1;
-  --text-3:      #737d8c;
-  --text-4:      #5c6675;
+  --text-3:      #7e8897;
+  --text-4:      #6e7887;
 
   /* Headings sit a step brighter than --text on purpose, so they need their own
      token rather than reusing it. Added 2026-08-19: h1-h4 and .spec-v strong
@@ -279,6 +291,8 @@ em, .accent-em {
   font-size: 15px;
   line-height: 1.7;
   color: var(--text-3);
+  /* the /industries table legend ran to ~181 characters per line at 1440px */
+  max-width: 78ch;
 }
 
 .tag {
@@ -364,186 +378,6 @@ em, .accent-em {
   align-items: center;
 }
 
-/* ---------- Navigation ---------- */
-
-.nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 200;
-  border-bottom: 1px solid transparent;
-  transition: background 0.35s, border-color 0.35s, backdrop-filter 0.35s;
-}
-
-.nav.scrolled {
-  background: rgba(5,7,10,0.86);
-  backdrop-filter: blur(22px) saturate(140%);
-  -webkit-backdrop-filter: blur(22px) saturate(140%);
-  border-bottom-color: var(--nx-border);
-}
-
-/* Scroll progress. The only scroll behaviour was a binary .scrolled class at
-   12px; this is the one continuously-moving element on a 9,700px page.
-   Pure CSS via a scroll timeline — browsers without it simply never show it. */
-.nav::after {
-  content: '';
-  position: absolute;
-  left: 0; bottom: -1px;
-  width: 100%;
-  height: 2px;
-  background: var(--nx-accent);
-  transform: scaleX(0);
-  transform-origin: left;
-  animation: navprog linear both;
-  animation-timeline: scroll(root block);
-}
-
-@keyframes navprog { to { transform: scaleX(1); } }
-
-@media (prefers-reduced-motion: reduce) {
-  .nav::after { display: none; }
-}
-
-.nav-inner {
-  max-width: 1680px;
-  margin-inline: auto;
-  padding: 18px var(--gutter);
-  display: flex;
-  align-items: center;
-  gap: 40px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  flex: none;
-}
-
-/* Nav uses the mark plus a typeset wordmark. The full lockup's
-   "SECURITY SOLUTIONS" subline is only 4.5px tall at a 34px lockup height —
-   sub-pixel strokes that anti-alias into a grey bar. The full lockup is
-   kept for the footer, where there is room to render it legibly. */
-.brand-mark {
-  height: 30px;
-  width: auto;
-  display: block;
-}
-
-.brand-word {
-  font-family: var(--mono);
-  font-size: 16px;
-  font-weight: 500;
-  letter-spacing: 0.34em;
-  line-height: 1;
-  color: #fff;
-  padding-top: 2px;
-}
-
-.brand-logo {
-  height: 34px;
-  width: auto;
-  display: block;
-}
-
-.foot-brand .brand-logo { height: 56px; }
-
-.brand-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--nx-accent);
-  box-shadow: 0 0 12px var(--nx-accent);
-  animation: breathe 2.4s ease-in-out infinite;
-  flex: none;
-}
-
-@keyframes breathe {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.35; transform: scale(0.82); }
-}
-
-.nav-links {
-  display: flex;
-  gap: 30px;
-  list-style: none;
-  margin-left: auto;
-}
-
-.nav-links a {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  color: var(--text-2);
-  transition: color 0.25s;
-  position: relative;
-  padding-block: 4px;
-}
-
-.nav-links a::after {
-  content: '';
-  position: absolute;
-  left: 0; bottom: 0;
-  width: 100%; height: 1px;
-  background: var(--nx-accent);
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.35s var(--ease);
-}
-
-.nav-links a:hover { color: var(--text); }
-.nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
-.nav-links a.active { color: var(--nx-accent); }
-.nav-links a.active::after { transform: scaleX(1); }
-
-.nav-cta {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  padding: 11px 22px;
-  border: 1px solid var(--nx-accent);
-  color: var(--nx-accent);
-  transition: background 0.3s, color 0.3s;
-  flex: none;
-}
-
-.nav-cta:hover { background: var(--nx-accent); color: var(--bg); }
-
-.nav-toggle {
-  display: none;
-  margin-left: auto;
-  background: none;
-  border: 1px solid var(--nx-border-lit);
-  color: var(--text);
-  padding: 9px 12px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.15em;
-}
-
-.nav-mobile {
-  display: none;
-  border-top: 1px solid var(--nx-border);
-  background: rgba(5,7,10,0.97);
-  backdrop-filter: blur(20px);
-  padding: 12px var(--gutter) 24px;
-}
-
-.nav-mobile.open { display: block; }
-
-.nav-mobile a {
-  display: block;
-  font-family: var(--mono);
-  font-size: 14px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-2);
-  padding: 14px 0;
-  border-bottom: 1px solid var(--nx-border);
-}
-
-.nav-mobile a:last-child { border-bottom: none; }
-.nav-mobile a.active { color: var(--nx-accent); }
 
 /* ---------- Page header (interior pages) ---------- */
 
@@ -631,12 +465,17 @@ em, .accent-em {
 .crumb span { color: var(--nx-accent); }
 /* 7.4 — the breadcrumb link is a standalone control, so it gets a 44px tap
    area via a pseudo-element rather than padding, which would push the 22px
-   margin below it out of rhythm. */
+   margin below it out of rhythm.
+
+   Bled 3px past each end on 2026-08-20: the word HOME sets its own box at
+   38px, so height alone left the target 38 wide. Nothing else here is
+   clickable — the separator and the current-page span are both text — so the
+   overhang cannot steal a tap from a neighbour. */
 .crumb a { position: relative; }
 .crumb a::after {
   content: '';
   position: absolute;
-  left: 0; right: 0; top: 50%;
+  left: -3px; right: -3px; top: 50%;
   transform: translateY(-50%);
   height: 44px;
 }
@@ -714,7 +553,7 @@ em, .accent-em {
 
 .cell-icon svg { width: 26px; height: 26px; }
 
-.cell h3 { margin-bottom: 12px; font-size: 20px; }
+.cell h3, .cell .h3 { margin-bottom: 12px; font-size: 20px; }
 .cell p { font-family: var(--sans); font-size: 16px; font-weight: 300; line-height: 1.7; color: var(--text-3); }
 
 .cell-foot {
@@ -783,7 +622,29 @@ img.shot-phone {
 
    The wrapper is what draws the frame — an <img> cannot carry pseudo-elements,
    so the markup needs the extra element. */
+/* A real phone is 9:19.5. These captures are not — nx_app_guard is 0.611,
+   nx_app_fall 0.650, nx_app_deterrence 0.493 — so a frame sized to the image
+   came out at 0.626, which is tablet proportions. That mismatch is what made
+   the screen inside read as badly cropped: the eye expects a taller device and
+   scores the difference as missing interface.
+
+   The screen is a 9:17 box now and the capture is contained inside it,
+   anchored to the bottom. Bottom-anchored because that is where the parts that
+   must not move live — nx_app_guard ends on its tab bar, and the two is-cut
+   captures end on their severed edge, which the fade below exists to hide. The
+   letterbox that opens at the top is the image's own background colour
+   (#0a100e, sampled from the top row of both full-height captures), so it reads
+   as the dark head of the screen rather than a gap. 9:17 rather than a
+   flagship 9:19.5 because the four candidates were rendered and compared: at
+   19.5 the letterbox is a quarter of the screen and reads as a void, at 16 the
+   device goes squat again. 17 keeps phone proportions and leaves a band that
+   passes for a status area.
+
+   This is a presentation fix, not a substitute for full-height captures from
+   the app. Re-export at true phone resolution and --screen-ratio can go. */
 .phone-frame {
+  --screen-ratio: 9 / 17;
+  --screen-bg: #0a100e;
   position: relative;
   max-width: 340px;
   width: 100%;
@@ -801,50 +662,52 @@ img.shot-phone {
 .phone-frame img.shot-phone {
   display: block;
   width: 100%;
-  max-width: none;      /* the frame owns the width now, not the image */
-  height: auto;
+  max-width: none;        /* the frame owns the width now, not the image */
+  aspect-ratio: var(--screen-ratio);
+  object-fit: contain;
+  object-position: bottom;
   border: 0;
   border-radius: 33px;
-  background: #05070a;
+  background: var(--screen-bg);
 }
-/* Two of the three app captures stop mid-card: nx_app_deterrence ends just
-   after the Evidence row and nx_app_fall just after Notify, because that is
-   all the source had. Presented flat they read as badly cropped pictures.
 
-   Faded at the bottom they read as what they actually are — a screen with more
-   below the fold. Opt-in, because nx_app_guard ends on its tab bar and is
-   complete; fading that one would hide real UI.
-
-   The proper fix is a full-height re-export of both screens. This is the
-   honest presentation of what exists today, not a substitute for that. */
-.phone-frame.is-cut { position: relative; }
+/* nx_app_deterrence and nx_app_fall stop mid-card, because that is all the
+   source had. Anchored to the bottom, that severed edge lands on the screen's
+   bottom edge, and this fades it out so it reads as a screen continuing past
+   the fold rather than a picture cut off. nx_app_guard ends on its own tab bar
+   and is complete, so it does not opt in — fading it would hide real UI. */
 .phone-frame.is-cut::before {
   content: '';
   position: absolute;
   left: 11px; right: 11px; bottom: 11px;
   height: 78px;
   border-radius: 0 0 33px 33px;
-  background: linear-gradient(to bottom, rgba(5, 7, 10, 0) 0%, rgba(5, 7, 10, 0.86) 72%, rgba(5, 7, 10, 0.97) 100%);
+  background: linear-gradient(to bottom, rgba(10, 16, 14, 0) 0%, rgba(10, 16, 14, 0.86) 72%, rgba(10, 16, 14, 0.97) 100%);
   pointer-events: none;
   z-index: 1;
 }
 
-/* side button — the one piece of device detail worth keeping, because it is
-   what stops the frame reading as a plain rounded rectangle */
+/* Side button — the one piece of device detail worth keeping, because it is
+   what stops the frame reading as a plain rounded rectangle. Was 3px of
+   var(--nx-accent-low): a saturated green stripe standing outside the bezel
+   edge, which read as a rendering artefact rather than hardware. A real side
+   button is the same material as the case. */
 .phone-frame::after {
   content: '';
   position: absolute;
-  right: -2px;
-  top: 22%;
-  width: 3px;
-  height: 62px;
-  border-radius: 3px;
-  background: var(--nx-accent-low);
-  opacity: 0.8;
+  right: -1px;
+  top: 23%;
+  width: 2px;
+  height: 54px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.16);
 }
 @media (max-width: 720px) {
   .phone-frame { max-width: 290px; border-radius: 38px; padding: 9px; }
   .phone-frame img { border-radius: 29px; }
+  .phone-frame.is-cut::before {
+    left: 9px; right: 9px; bottom: 9px; border-radius: 0 0 29px 29px;
+  }
 }
 
 /* For a crop of part of an interface rather than a whole phone. Same border,
@@ -1009,7 +872,7 @@ img.shot-ui {
 .foot-brand .brand { margin-bottom: 20px; }
 .foot-brand p { font-family: var(--sans); font-size: 15px; font-weight: 300; line-height: 1.65; color: var(--text-3); max-width: 34ch; }
 
-.foot-col h5 {
+.foot-col h2 {
   font-family: var(--mono);
   font-size: 12px;
   letter-spacing: 0.22em;
@@ -1426,7 +1289,7 @@ img.shot-ui {
   margin-bottom: 10px;
 }
 
-.leg h4 { font-size: 15px; margin-bottom: 7px; }
+.leg h4, .leg .h4 { font-size: 15px; margin-bottom: 7px; }
 .leg p { font-family: var(--sans); font-size: 15px; font-weight: 300; line-height: 1.65; color: var(--text-3); }
 
 /* ============================================================
@@ -1659,7 +1522,7 @@ img.shot-ui {
 .flow-rail .leg.is-spent { opacity: 0.62; border-left-color: var(--nx-border-lit); }
 .flow-rail .leg.is-live  { opacity: 1;   border-left-color: var(--nx-accent); }
 
-.flow-rail .leg h4 { margin: 0 0 6px; font-size: 17px; }
+.flow-rail .leg h4, .flow-rail .leg .h4 { margin: 0 0 6px; font-size: 17px; }
 .flow-rail .leg > p {
   font-family: var(--sans);
   font-size: 14px;
@@ -1727,7 +1590,7 @@ img.shot-ui {
 @media (max-height: 860px) {
   #signal-path .scrub-stage { padding-top: 64px; }
   .flow-rail .leg { padding-top: 7px; padding-bottom: 7px; }
-  .flow-rail .leg h4 { font-size: 16px; margin-bottom: 4px; }
+  .flow-rail .leg h4, .flow-rail .leg .h4 { font-size: 16px; margin-bottom: 4px; }
   .flow-rail .leg > p { font-size: 13.5px; line-height: 1.55; }
   .flow-rail .leg.is-spent > p { font-size: 12.5px; line-height: 1.45; }
   .leg-lat { margin-top: 7px; }
@@ -1945,6 +1808,19 @@ img.shot-ui {
 }
 .det-tabs::-webkit-scrollbar { display: none; }
 
+/* The strip is 600px of tabs. At 390px the container is 344px, so tabs 3 and
+   4 begin off-screen at 473px and 623px — and because the scrollbar above is
+   hidden, nothing said they were there. The sibling .flow-stage solves the
+   same problem with a visible scrollbar plus a "swipe" line; a strip of tabs
+   is small enough that a fade on the trailing edge carries it instead.
+   Only below 720px, where the strip actually overflows. */
+@media (max-width: 720px) {
+  .det-tabs {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent 100%);
+  }
+}
+
 .det-tab {
   flex: 1;
   min-width: 150px;
@@ -1979,12 +1855,15 @@ img.shot-ui {
   z-index: 2;
 }
 
+/* --text-3, not --text-4: these sublabels sit on --surface rather than the
+   page ground, where text-4 measures 4.27:1 — the one place the token comment
+   warns about. text-3 clears 4.5:1 on both. */
 .det-tab i {
   display: block;
   font-style: normal;
   font-size: 10px;
   letter-spacing: 0.1em;
-  color: var(--text-4);
+  color: var(--text-3);
   margin-top: 5px;
 }
 
@@ -2182,6 +2061,9 @@ img.shot-ui {
    status, they are compared down the column, and they are the brand signature
    7.1 correctly protected. This cell is prose and reads as prose. */
 .spec-v {
+  /* ran to ~132 characters per line on /platform, /hive and /privacy at
+     desktop width; comfortable reading tops out around 75 */
+  max-width: 72ch;
   padding: 26px 30px;
   font-family: var(--sans);
   font-size: 15px;
@@ -2227,8 +2109,15 @@ img.shot-ui {
 
 .price-card:hover { background: var(--surface); }
 
+/* The green wash is translucent for its first 42%, and the card sits in a
+   1px grid whose gaps are painted --nx-border. With no colour of its own the
+   card was a window onto that border colour, and the sub-head landing at 10%
+   read 4.39:1 — an AA failure caused by a background nobody intended. The
+   opaque layer beneath is the card ground the other two plans already have. */
 .price-card.featured {
-  background: linear-gradient(180deg, rgba(0,255,136,0.05) 0%, var(--surface) 42%);
+  background:
+    linear-gradient(180deg, rgba(0,255,136,0.05) 0%, var(--surface) 42%),
+    var(--surface);
 }
 /* ---- the beam on the recommended plan ----
 
@@ -2503,10 +2392,12 @@ img.shot-ui {
 
 .field select option { background: var(--surface); color: var(--text); }
 
+/* --text-3, not --text-4: this is 14px prose under the form fields, not a
+   micro-label, and on the panel gradient text-4 measures 4.48:1. */
 .form-note {
   font-family: var(--sans);
   font-size: 14px;
-  color: var(--text-4);
+  color: var(--text-3);
   line-height: 1.7;
 }
 
@@ -2528,7 +2419,7 @@ img.shot-ui {
    horizontally by 1px. Both halves are needed: min-width lets the column
    shrink, overflow-wrap lets the address itself break. */
 .contact-line > div:not(.ci) { min-width: 0; }
-.contact-line h4 { font-size: 14px; margin-bottom: 4px; }
+.contact-line h4, .contact-line .h4 { font-size: 14px; margin-bottom: 4px; }
 /* Split 2026-08-19. 7.1 kept .contact-line in mono because it holds "emails,
    phone" — true of the <a>, which is an address you read character by character
    and which stays mono. The <p> beside it is ordinary prose, 105 and 116
@@ -2659,7 +2550,7 @@ img.shot-ui {
 }
 
 .tl-date { font-family: var(--mono); font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--nx-accent-mid); margin-bottom: 9px; }
-.tl-item h4 { font-size: 18px; margin-bottom: 9px; }
+.tl-item h4, .tl-item .h4 { font-size: 18px; margin-bottom: 9px; }
 .tl-item p { font-family: var(--sans); font-size: 15px; font-weight: 300; line-height: 1.65; color: var(--text-3); max-width: 62ch; }
 
 /* ============================================================
@@ -2817,18 +2708,8 @@ img.shot-ui {
   .g4 { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* .nav-inner needs ~1160px to lay out brand + 7 links + CTA on one line;
-   below that the list wrapped and the fixed bar grew 81px -> 88px. */
-@media (max-width: 1160px) {
-  .nav-links { display: none; }
-  .nav-cta { display: none; }
-  .nav-toggle { display: block; }
-  .nav-inner { gap: 16px; }
-}
-
 @media (max-width: 900px) {
   :root { --gutter: 22px; }
-  .nav-inner { gap: 16px; }
 
   .band { padding-block: 80px; }
   .band-lg { padding-block: 96px; }
@@ -2874,6 +2755,9 @@ img.shot-ui {
     font-size: 14px;
   }
   .foot-bar { padding-block: 22px; line-height: 2; }
+  /* the bottom-bar links are 15px tall, under the 24px WCAG 2.5.8 minimum,
+     and are the CalOPPA privacy link — worth hitting first time */
+  .foot-bar a { display: inline-flex; align-items: center; min-height: 44px; }
   .crumb a { display: inline-block; padding-block: 8px; }
 }
 

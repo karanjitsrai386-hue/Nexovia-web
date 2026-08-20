@@ -3,7 +3,7 @@
    Scroll-scrubbed isometric teardown of the Hive enclosure.
 
    Geometry is a true isometric projection at K px/mm, built from
-   the Jetson Orin Nano dev-kit's real dimensions — carrier board
+   the AI module and carrier board's real dimensions — carrier board
    100 x 79 mm, SO-DIMM module 69.6 x 45 mm — so the layers sit in
    correct proportion to one another rather than as uniform tiles.
 
@@ -126,7 +126,7 @@
 
   var svg = '' +
 '<svg class="xl-svg" viewBox="0 0 1500 1360" xmlns="http://www.w3.org/2000/svg" role="img" ' +
-'aria-label="Exploded isometric view of the Nexovia Hive: black top shell with a square fan window, a blower, a finned heatsink, the Jetson Orin Nano SO-DIMM module with its SoC and LPDDR5 packages, the carrier board carrying the SO-DIMM socket, CAM0 and CAM1 connectors, a 40-pin header, M.2 slot and the DC, HDMI, dual USB-A and gigabit Ethernet port bank, and the base tray.">' +
+'aria-label="Exploded isometric view of the Nexovia Hive: black top shell with a square fan window, a blower, a finned heatsink, the AI analytics module on its SO-DIMM card with SoC and LPDDR5 packages, the carrier board carrying the SO-DIMM socket, CAM0 and CAM1 connectors, a 40-pin header, M.2 slot and the DC, HDMI, dual USB-A and gigabit Ethernet port bank, and the base tray.">' +
 
   '<defs>' +
     '<linearGradient id="xlShell" x1="0" y1="0" x2="1" y2="1">' +
@@ -203,7 +203,7 @@
     label(Y[4], '05', 'Carrier board', '100 × 79 mm · GbE · M.2 · 40-PIN') +
   '</g>' +
 
-  /* ═══ 04 · JETSON ORIN NANO MODULE ═══ */
+  /* ═══ 04 · AI ANALYTICS MODULE ═══ */
   '<g class="xl xl-4">' +
     walls(Y[3], MOD[0], MOD[1], 7, '#0b1119', '#070a0f') +
     '<path d="' + plate(Y[3], MOD[0], MOD[1], 0.05) + '" fill="url(#xlMod)" stroke="' + A + '" stroke-width="1.5"/>' +
@@ -218,7 +218,7 @@
     part(Y[3], MOD[0], MOD[1], 52, 25, 63, 35, '#12161d', '#3f4653') +
     /* SO-DIMM gold edge fingers */
     part(Y[3], MOD[0], MOD[1], 10, 41.5, 60, 44, '#c8a24a') +
-    label(Y[3], '04', 'Jetson Orin Nano', '69.6 × 45 mm SO-DIMM · 1024-CORE GPU') +
+    label(Y[3], '04', 'AI analytics module', '69.6 × 45 mm SO-DIMM · INTEGRATED GPU') +
   '</g>' +
 
   /* ═══ 03 · HEATSINK ═══ */
@@ -288,7 +288,7 @@
     ['01', 'Top shell', 'Fan window · sealed'],
     ['02', 'Blower', 'Active cooling · PWM'],
     ['03', 'Heatsink', 'Die-cast fin stack'],
-    ['04', 'Jetson Orin Nano', '69.6 × 45 mm SO-DIMM · 1024-core GPU'],
+    ['04', 'AI analytics module', '69.6 × 45 mm SO-DIMM · integrated GPU'],
     ['05', 'Carrier board', '100 × 79 mm · GbE · M.2 · 40-pin'],
     ['06', 'Base tray', 'Black shell · wall / DIN mount']
   ];

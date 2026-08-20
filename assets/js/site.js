@@ -6,33 +6,6 @@
 
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- Nav: scrolled state ---------- */
-  var nav = document.querySelector('.nav');
-  if (nav) {
-    var onScroll = function () {
-      nav.classList.toggle('scrolled', window.scrollY > 12);
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-  }
-
-  /* ---------- Nav: mobile toggle ---------- */
-  var toggle = document.querySelector('.nav-toggle');
-  var mobile = document.querySelector('.nav-mobile');
-  if (toggle && mobile) {
-    toggle.addEventListener('click', function () {
-      var open = mobile.classList.toggle('open');
-      toggle.textContent = open ? 'CLOSE' : 'MENU';
-      toggle.setAttribute('aria-expanded', String(open));
-    });
-  }
-
-  /* ---------- Active nav link ---------- */
-  var here = location.pathname.split('/').pop() || 'index.html';
-  document.querySelectorAll('.nav-links a, .nav-mobile a').forEach(function (a) {
-    var href = a.getAttribute('href');
-    if (href === here) a.classList.add('active');
-  });
 
   /* ---------- Scroll reveal ---------- */
   var rvs = document.querySelectorAll('.rv');
