@@ -45,7 +45,40 @@ function init(host) {
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 200);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  /* A WebGL context is not guaranteed. iOS drops them under memory pressure
+     and refuses new ones when too many are live; a machine with no usable GPU
+     path refuses outright. There was no handling for either, so a refused
+     context left an empty box where the hero should be. Now the poster inside
+     [data-store-3d] is simply never stood down. */
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  } catch (err) {
+    return;
+  }
+  /* Constructing the renderer is not proof of a context. With WebGL refused,
+     three.js (r160) throws nothing and reports a context it does not have: it
+     hands back a renderer whose canvas draws nothing, render() quietly no-ops,
+     and every frame reports success — so the film looked "ready" over a blank
+     canvas and the poster stood down for nothing.
+
+     So ask the canvas, which cannot lie about it. Re-requesting a context of
+     the type already created returns that same context, so this costs nothing
+     when WebGL is healthy. */
+  const probe = renderer.domElement;
+  if (!(probe.getContext('webgl2') || probe.getContext('webgl'))) return;
+  /* A flag, not just the attribute: the frame loop re-asserts data-film every
+     frame, so clearing the attribute alone is undone on the very next tick. */
+  let contextLost = false;
+  renderer.domElement.addEventListener('webglcontextlost', (e) => {
+    /* preventDefault is what makes a restore possible at all */
+    e.preventDefault();
+    contextLost = true;
+    delete host.dataset.film;
+  });
+  renderer.domElement.addEventListener('webglcontextrestored', () => {
+    contextLost = false;
+  });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -1215,7 +1248,12 @@ function init(host) {
       idleBrowsers(clock.elapsedTime);
     }
 
+    if (contextLost) return;
     renderer.render(scene, camera);
+
+    /* the poster behind the canvas steps aside once there is a real frame to
+       step aside for, and comes back if the context goes away */
+    if (!host.dataset.film) host.dataset.film = 'ready';
   }
 
   if ('IntersectionObserver' in window) {
