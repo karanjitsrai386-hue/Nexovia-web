@@ -391,7 +391,19 @@
           p = p < 0 ? 0 : p > 1 ? 1 : p;
         }
       }
-      rig.style.setProperty('--p', p.toFixed(4));
+      /* Only rigs that actually read --p get it written.
+
+         Writing an inherited custom property on a section invalidates style
+         for everything under it, whether or not anything reads the value.
+         Measured 2026-08-20: the homepage rig has 320 descendants and NONE of
+         them respond to --p — its diagram is driven entirely by the is-live /
+         is-spent classes below, so the write was costing a full-subtree
+         invalidation per scroll frame in exchange for nothing. The teardown on
+         /hive is the one that reads it: 15 of its 223 descendants move with it.
+
+         If you add a --p-driven element to a rig and it sits motionless, this
+         attribute is why. Put data-scrub-p on the section. */
+      if (rig.hasAttribute('data-scrub-p')) rig.style.setProperty('--p', p.toFixed(4));
       paintChapters(rig, p, flat);
     });
   }
