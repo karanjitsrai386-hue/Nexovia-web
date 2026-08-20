@@ -1961,6 +1961,22 @@ img.shot-ui {
   object-fit: cover;
 }
 
+/* The deterrence camera is mounted inverted, so the clip comes off it upside
+   down. The reference cut (out/final/Nexovia_Guard_Demo.mp4, scenario 4
+   "Automated Flash Deterrence") rotates the picture 180 to put the scene the
+   right way up, which is why the burned-in timestamp reads mirrored there —
+   the overlay was baked in before the correction.
+
+   The site was shipping the raw orientation: pool at the bottom, patio
+   inverted, both people upside down, and only the burned-in text the right way
+   round. Rotating here matches the film. It also flips the poster frame, since
+   the poster is painted by the same <video> box.
+
+   Doing it in CSS rather than re-encoding because there is no ffmpeg on this
+   machine; if the clip is ever re-exported, correct it at source and drop the
+   attribute rather than stacking two rotations. */
+.det-video video[data-flip180] { transform: rotate(180deg); }
+
 .det-panel { padding: 40px 36px; display: flex; flex-direction: column; }
 
 .det-panel h3 { margin-bottom: 14px; }
@@ -2038,6 +2054,16 @@ img.shot-ui {
 }
 
 .split-media img, .split-media video { width: 100%; height: auto; display: block; }
+
+/* Wide banner art, at the full measure of its section rather than squeezed into
+   a split column. See the note in hive.astro. */
+.arrival-band {
+  margin-top: 48px;
+  border: 1px solid var(--nx-border);
+  background: var(--surface);
+  overflow: hidden;
+}
+.arrival-band img { width: 100%; height: auto; display: block; }
 
 .split-body h2 { font-size: clamp(30px, 3.4vw, 46px); margin-bottom: 22px; }
 
