@@ -24,6 +24,13 @@
   --text-3:      #737d8c;
   --text-4:      #5c6675;
 
+  /* Headings sit a step brighter than --text on purpose, so they need their own
+     token rather than reusing it. Added 2026-08-19: h1-h4 and .spec-v strong
+     hardcoded #fff, which meant they could not follow a ground change. Phase
+     5.7's inverted band re-grounded everything around them via tokens and left
+     every heading white on near-white — measured 1.1:1. */
+  --heading:     #fff;
+
   /* Brand — three tiers.
      Full-strength green marked every structural role at once (78 rules), so it
      read as texture rather than emphasis. It is now reserved for things the user
@@ -213,7 +220,7 @@ h1, .h1 {
   font-size: clamp(46px, 6.6vw, 104px);
   line-height: 0.96;
   letter-spacing: -0.02em;
-  color: #fff;
+  color: var(--heading);
 }
 
 h2, .h2 {
@@ -222,7 +229,7 @@ h2, .h2 {
   font-size: clamp(34px, 4.6vw, 68px);
   line-height: 1.03;
   letter-spacing: -0.015em;
-  color: #fff;
+  color: var(--heading);
 }
 
 h3, .h3 {
@@ -230,7 +237,7 @@ h3, .h3 {
   font-weight: 600;
   font-size: clamp(20px, 2vw, 26px);
   line-height: 1.25;
-  color: #fff;
+  color: var(--heading);
   letter-spacing: -0.01em;
 }
 
@@ -239,7 +246,7 @@ h4, .h4 {
   font-weight: 600;
   font-size: 17px;
   line-height: 1.35;
-  color: #fff;
+  color: var(--heading);
 }
 
 em, .accent-em {
@@ -771,10 +778,11 @@ img.shot-ui {
   display: block;
   border: 1px solid var(--nx-border-lit);
 }
+/* A caption is a sentence about the picture, not a value read off it. */
 .cap-shot figcaption {
   margin-top: 12px;
-  font-family: var(--mono);
-  font-size: 12.5px;
+  font-family: var(--sans);
+  font-size: 14px;
   font-weight: 300;
   line-height: 1.6;
   color: var(--text-4);
@@ -1312,7 +1320,10 @@ img.shot-ui {
 .bar-grow { transform-box: fill-box; transform-origin: bottom; animation: bargrow 3.4s ease-in-out infinite alternate; }
 @keyframes bargrow { from { transform: scaleY(0.45); } to { transform: scaleY(1); } }
 
-/* Flow legend below diagram */
+/* Flow legend below diagram.
+   Superseded by .flow-rail (Phase 5.2) and no longer referenced by any markup —
+   kept only because the two responsive overrides further down still name it and
+   removing all three is a separate, verifiable cleanup. Do not add new uses. */
 .flow-legend {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -1360,6 +1371,398 @@ img.shot-ui {
   display: grid;
   place-items: center;
   overflow: hidden;
+}
+
+/* ============================================================
+   Phase 5 — the flow pass (ref: thewatch.60fps.fr)
+   ============================================================
+
+   Shared vocabulary for the two pinned chapters, and only those two: the
+   signal path on / and the Hive teardown on /hive. The reference pins ONE
+   subject for 34,000px, which works because it has one subject. We have nine
+   bands and a CTA to reach, so two pinned moments read as deliberate where
+   five would read as a gimmick.
+
+   Everything below is inert unless a .scrub opts in, so none of it can leak
+   into an ordinary band. */
+
+/* ---- 5.1 chapter counter ---- */
+.scrub-counter {
+  position: absolute;
+  /* Clears the fixed nav. The stage is pinned at top:0, so anything above 64px
+     here sits behind the nav bar — the counter was invisible at 28px. */
+  top: 88px;
+  left: var(--gutter, 40px);
+  z-index: 4;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--nx-accent-mid);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.scrub.is-flat .scrub-counter { display: none; }
+
+/* ---- 5.3 registration marks ----
+   A centre line, a + tick at the top, and hairlines running off to both
+   gutters. This extends the drawn container grid the site already has rather
+   than inventing a second language, so it is all one absolutely-positioned
+   layer with no markup beyond a single empty div. */
+.scrub-reg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.55;
+}
+.scrub-reg::before {
+  /* centre line */
+  content: '';
+  position: absolute;
+  left: 50%; top: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg,
+    transparent 0%, var(--nx-border) 14%, var(--nx-border) 86%, transparent 100%);
+}
+.scrub-reg::after {
+  /* + tick, drawn as a crosshair from two gradients on one box.
+     Below the nav, like the counter. */
+  content: '';
+  position: absolute;
+  left: 50%; top: 92px;
+  width: 13px; height: 13px;
+  transform: translateX(-50%);
+  background:
+    linear-gradient(var(--nx-accent-low), var(--nx-accent-low)) 50% 0 / 1px 100% no-repeat,
+    linear-gradient(var(--nx-accent-low), var(--nx-accent-low)) 0 50% / 100% 1px no-repeat;
+}
+/* hairlines to both gutters, sitting on the optical centre of the stage */
+.scrub-rule {
+  position: absolute;
+  top: 50%;
+  height: 1px;
+  width: calc(var(--gutter, 40px) + 26px);
+  background: var(--nx-border);
+  pointer-events: none;
+  z-index: 1;
+}
+.scrub-rule.is-l { left: 0; }
+.scrub-rule.is-r { right: 0; }
+
+/* ---- 5.5 two-tone stacked headline ----
+   New rhythm without a new font: first line recedes, second lands. */
+.stack-h {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(30px, 3.4vw, 50px);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  margin: 0 0 18px;
+  color: var(--text);
+}
+.stack-h > span {
+  display: block;
+  color: var(--text-3);
+}
+
+/* ---- 5.6 giant corner numeral ----
+   One per pinned chapter, unlabelled, deliberately unexplained. Distinct from
+   the stat rail, which always labels its numbers. Outline rather than fill so
+   it reads as a graphic and never competes with the copy. */
+.scrub-numeral {
+  position: absolute;
+  right: var(--gutter, 40px);
+  bottom: 34px;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: clamp(64px, 9vw, 152px);
+  line-height: 0.8;
+  letter-spacing: -0.03em;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--nx-border-lit);
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ---- 5.4 oversized type behind the subject ----
+   Reuses .foot-word's outline treatment rather than inventing one. Sits behind
+   the artwork and is occluded by it, which is the whole point — it is texture,
+   not a heading, so it is aria-hidden in the markup. */
+.scrub-word {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  font-family: var(--sans);
+  font-weight: 800;
+  /* 20vw, not 26vw. At 26vw "HIVE" measured 1453px wide in a 1440px viewport —
+     both outer letters ran off the edge, so what was left read as two floating
+     rectangles rather than a word. The reference lets the subject occlude the
+     MIDDLE of its type; the ends have to survive for that to read. */
+  font-size: clamp(90px, 20vw, 300px);
+  line-height: 0.76;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--nx-border-lit);
+  opacity: 0.62;
+  user-select: none;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  /* The pinned rig is already dropped below 900. Take the decoration with it —
+     at this width the marks crowd the artwork and the numeral collides with
+     the copy. */
+  .scrub-reg, .scrub-rule, .scrub-numeral, .scrub-word { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrub-reg, .scrub-rule { display: none; }
+}
+
+/* ---- 5.7 the light inversion chapter ----
+
+   ONE inverted chapter site-wide, on "Keep every camera you already paid for",
+   because that is the one section about the world OUTSIDE the box. The
+   reference flips to black exactly where the case comes off and you are looking
+   at the movement: outside light, inside dark. Ours runs the same logic in
+   reverse, since our resting state is dark.
+
+   Done as a TOKEN SWAP, not a restyle. Every rule in this sheet already reads
+   --bg / --text / --nx-border, so redefining those on one element re-grounds
+   everything inside it and no child needs touching. That is Phase 7's rule
+   ("never hand-style during a port") applied to a colour change.
+
+   The gate the plan set: #00ff88 on white is unreadable — measured 1.5:1, well
+   under the 4.5:1 floor. So --nx-accent becomes --nx-accent-deep here, and the
+   structural tiers darken with it. */
+.band-invert {
+  --bg:            #f2f5f3;
+  --surface:       #e6ebe8;
+  --text:          #080b0e;
+  --text-2:        #303840;
+  --text-3:        #4e575f;
+  --text-4:        #69727a;
+  --heading:       #05080b;
+  --nx-border:     rgba(8, 11, 14, 0.14);
+  --nx-border-lit: rgba(8, 11, 14, 0.30);
+  /* --nx-accent-deep (#00c46a) is the plan's named replacement for the neon,
+     and it is right for fills — but as TEXT on this ground it measures ~2.1:1,
+     so it cannot carry links or eyebrows. The three tiers darken instead, and
+     keep the same job separation they have on dark: action / structure /
+     metadata. #04693e on #f2f5f3 is ~5.4:1. */
+  --nx-accent:     #04693e;
+  --nx-accent-mid: #2a7a55;
+  --nx-accent-low: #4a8f6e;
+  --nx-accent-glow: rgba(0, 150, 80, 0.12);
+  --nx-accent-film: rgba(0, 150, 80, 0.05);
+
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Optical correction, not a restyle. The site sets prose at weight 300, which
+   carries on a near-black ground because light type on dark optically gains
+   weight. Invert the ground and the same 300 goes thin and patchy — the strokes
+   lose mass against the paper rather than bleeding into it. One step up
+   restores the texture the dark bands have. */
+.band-invert .body-copy,
+.band-invert .check-list li,
+.band-invert p { font-weight: 400; }
+
+/* ---- 5.2 the pinned signal path ---- */
+.flow-pin {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(300px, 27%) 1fr;
+  gap: 48px;
+  align-items: center;
+  width: 100%;
+}
+
+.flow-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-left: 1px solid var(--nx-border);
+}
+
+/* The rail's blocks stack rather than swap: all five stay, and contrast alone
+   says where you are. is-live and is-spent are set from --p by
+   paintChapters() in hive-explode.js. */
+.flow-rail .leg {
+  background: none;
+  padding: 12px 0 12px 20px;
+  margin-left: -1px;
+  border-left: 1px solid transparent;
+  opacity: 0.34;
+  transition: opacity 0.45s var(--ease), border-color 0.45s var(--ease);
+}
+.flow-rail .leg:hover { background: none; }
+/* Spent stages STAY. The reference stacks copy rather than swapping it, and
+   5.2 is explicit: "none removed". A stage that has gone by keeps its
+   paragraph, just quieter — the rail reads as an accumulating account of one
+   frame's journey, not as a slideshow. Upcoming stages show their heading only,
+   so the whole path is visible from the start without pre-empting itself. */
+.flow-rail .leg.is-spent { opacity: 0.62; border-left-color: var(--nx-border-lit); }
+.flow-rail .leg.is-live  { opacity: 1;   border-left-color: var(--nx-accent); }
+
+.flow-rail .leg h4 { margin: 0 0 6px; font-size: 17px; }
+.flow-rail .leg > p {
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-3);
+  margin: 0;
+  /* Spent stages keep their heading and give the space back to the live one.
+
+     max-height, not grid-template-rows: 0fr. The grid trick only collapses a
+     real child element, and this <p> holds raw text, so the browser wraps it in
+     an ANONYMOUS grid item that the row sizing does not reach. The result was a
+     paragraph that faded to opacity 0 but kept its full height — the rail was
+     hidden text separated by ~130px of dead space. max-height collapses it for
+     real without needing a wrapper element in the markup. */
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.45s var(--ease), opacity 0.35s var(--ease), font-size 0.45s var(--ease);
+}
+/* arrived — and it stays arrived */
+.flow-rail .leg.is-live > p  { max-height: 9em; opacity: 1; }
+/* Spent copy is kept but set a step smaller and tighter. That is what buys the
+   room for all five to be open at once inside a 100vh stage: five paragraphs at
+   full size overflow a short viewport, and .scrub-stage clips rather than
+   scrolls. */
+.flow-rail .leg.is-spent > p { max-height: 9em; opacity: 1; font-size: 13px; line-height: 1.5; }
+
+/* latency bar — the same 6/9/23/4/8 that sums to the hero's <50ms */
+.leg-lat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: height 0.4s var(--ease), opacity 0.4s var(--ease);
+}
+.flow-rail .leg.is-live .leg-lat { height: 14px; opacity: 1; }
+.leg-lat i {
+  display: block;
+  height: 2px;
+  width: var(--w, 10%);
+  background: var(--nx-accent);
+  flex: none;
+}
+.leg-lat b {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  color: var(--nx-accent-mid);
+}
+
+.flow-art { position: relative; min-width: 0; }
+.flow-art .flow-stage { max-height: 62vh; }
+
+/* Short viewports: the stage is pinned at top:0 and its contents are centred,
+   so on a laptop screen the accumulated rail grows up past the fixed nav and
+   "01 — CAPTURE" disappears behind it. Measured at 1024x700 the rail topped out
+   at y=14, under a 64px nav.
+
+   Clear the nav, and buy the height back out of the rail's own padding and type
+   so the clearance does not just move the clipping to the bottom edge. */
+@media (max-height: 860px) {
+  #signal-path .scrub-stage { padding-top: 64px; }
+  .flow-rail .leg { padding-top: 7px; padding-bottom: 7px; }
+  .flow-rail .leg h4 { font-size: 16px; margin-bottom: 4px; }
+  .flow-rail .leg > p { font-size: 13.5px; line-height: 1.55; }
+  .flow-rail .leg.is-spent > p { font-size: 12.5px; line-height: 1.45; }
+  .leg-lat { margin-top: 7px; }
+}
+
+@media (max-width: 1100px) {
+  .flow-pin { grid-template-columns: minmax(260px, 34%) 1fr; gap: 30px; }
+}
+
+/* Below 900 the rig is already flat. Put the signal path back to a plain
+   stacked read: diagram first, then all five legs at full contrast in the
+   original five-up rhythm, with no state and no latency reveal to chase. */
+@media (max-width: 900px) {
+  /* .scrub-stage is `place-items: center`, which is right while pinned but
+     stops the flat layout stretching: the grid area sizes to content, so
+     `repeat(auto-fit, minmax(240px,1fr))` laid the rail out as THREE 240px
+     columns inside a 390px screen. Measured paragraphs at left=289, 536 and
+     782, all running off the right edge — three hard failures in
+     check:mobile. Stretch the stage and pin the rail to one column. */
+  /* minmax(0, 1fr), not the default auto track.
+
+     The diagram sets `.flow-stage > [data-flow] { min-width: 960px }` below
+     1200 and scrolls it inside an overflow-x box. An `auto` grid track sizes to
+     max-content, so that 960px floor propagated up and made the whole column
+     960px wide inside a 390px screen — every paragraph in the rail inherited it
+     and ran ~600px off the right edge. minmax(0, …) lets the track shrink below
+     its content and hands the overflow back to .flow-stage, which is built to
+     scroll. */
+  .scrub-stage { justify-items: stretch; grid-template-columns: minmax(0, 1fr); }
+  .flow-pin {
+    /* flex, not block — `order` below needs a flex or grid parent to mean
+       anything. As `display: block` it was silently ignored and the diagram sat
+       underneath the five legs, the reverse of the reading order the section
+       has always had: show the path, then explain its stages. */
+    display: flex;
+    flex-direction: column;
+    /* width:100% and max-width:100%, NOT width:auto.
+
+       .flow-pin is also a .wrap, and .wrap sets `margin-inline: auto`. Auto
+       margins on a grid item beat `justify-items: stretch` and put the box back
+       into shrink-to-fit, which resolves to max-content — and max-content here
+       is the 960px diagram floor. The track was correctly 390px while the item
+       inside it measured 1030px. */
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-inline: 0;
+    padding-block: 8px 0;
+  }
+  .flow-art { min-width: 0; max-width: 100%; }
+  .flow-rail {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: var(--nx-border);
+    border: 1px solid var(--nx-border);
+    border-top: none;
+    margin-top: 24px;
+  }
+  .flow-rail .leg {
+    background: var(--bg);
+    opacity: 1;
+    padding: 22px 20px;
+    margin-left: 0;
+    border-left: none;
+  }
+  /* max-height, matching the mechanism the pinned rail actually uses. This said
+     `grid-template-rows: 1fr` — left over from the first implementation — so it
+     reset a property nothing reads any more and the base `max-height: 0` stayed
+     in force. Every paragraph in the flat rail was collapsed: five headings and
+     no copy. */
+  .flow-rail .leg > p,
+  .flow-rail .leg.is-spent > p {
+    max-height: none;
+    opacity: 1;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .flow-rail .leg .leg-lat { height: 14px; opacity: 1; }
+  .flow-art .flow-stage { max-height: none; }
+  /* diagram above the legs, matching the old reading order */
+  .flow-pin .flow-art { order: -1; }
 }
 
 .xl-svg {
@@ -1700,17 +2103,26 @@ img.shot-ui {
    .spec-k and .spec-x must stay stretched — they draw the column dividers with
    border-right / border-left, which collapse to nothing if the cell is
    centred rather than filling the row. */
+/* Sans, not mono — Phase 7.1 finished 2026-08-19.
+   7.1 reported prose-in-mono at 34 -> 0. Re-measured across all ten routes it
+   was 51, and .spec-v was 34 of them on its own: it was never in 7.1's list of
+   twelve rules, because the name says "value" and the assumption was that it
+   held values. It does not. It holds four-line explanatory sentences, up to
+   187 characters on /privacy.
+   The key (.spec-k) and the tag (.spec-x) stay mono. Those are a label and a
+   status, they are compared down the column, and they are the brand signature
+   7.1 correctly protected. This cell is prose and reads as prose. */
 .spec-v {
   padding: 26px 30px;
-  font-family: var(--mono);
-  font-size: 14px;
+  font-family: var(--sans);
+  font-size: 15px;
   font-weight: 300;
   color: var(--text-2);
   line-height: 1.7;
   display: block;
   align-self: center;
 }
-.spec-v strong { color: #fff; font-weight: 400; }
+.spec-v strong { color: var(--heading); font-weight: 400; }
 
 .spec-x {
   padding: 26px 30px;
@@ -1826,9 +2238,11 @@ img.shot-ui {
   letter-spacing: -0.01em;
 }
 
+/* Prose, not a value — see the .spec-v note. Three tier descriptions, two
+   lines each, previously 12.5px mono. */
 .price-for {
-  font-family: var(--mono);
-  font-size: 12.5px;
+  font-family: var(--sans);
+  font-size: 14px;
   font-weight: 300;
   color: var(--text-3);
   line-height: 1.7;
@@ -1888,6 +2302,17 @@ img.shot-ui {
 }
 .cmp tbody th { color: var(--text-2); font-weight: 400; border-right: 1px solid var(--nx-border); }
 .cmp td { color: var(--text-3); text-align: center; }
+/* The one prose column in a table of values. /pricing's comparison table is all
+   short values and stays mono throughout, which 7.1 was right about;
+   /capabilities carries a full sentence per row in the same table shape.
+   Replaces a per-cell inline `text-align:left`. */
+.cmp td.desc {
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.65;
+  text-align: left;
+  color: var(--text-2);
+}
 .cmp td.yes { color: var(--nx-accent); }
 .cmp td.no { color: var(--text-3); }
 .cmp tbody tr:hover { background: var(--surface); }
@@ -2035,7 +2460,12 @@ img.shot-ui {
    shrink, overflow-wrap lets the address itself break. */
 .contact-line > div:not(.ci) { min-width: 0; }
 .contact-line h4 { font-size: 14px; margin-bottom: 4px; }
-.contact-line p, .contact-line a { font-family: var(--mono); font-size: 13px; font-weight: 300; color: var(--text-3); line-height: 1.7; overflow-wrap: anywhere; }
+/* Split 2026-08-19. 7.1 kept .contact-line in mono because it holds "emails,
+   phone" — true of the <a>, which is an address you read character by character
+   and which stays mono. The <p> beside it is ordinary prose, 105 and 116
+   characters, and was only riding on the same selector. */
+.contact-line a { font-family: var(--mono); font-size: 13px; font-weight: 300; color: var(--text-3); line-height: 1.7; overflow-wrap: anywhere; }
+.contact-line p { font-family: var(--sans); font-size: 15px; font-weight: 300; color: var(--text-3); line-height: 1.7; overflow-wrap: anywhere; }
 .contact-line a:hover { color: var(--nx-accent); }
 
 /* ============================================================

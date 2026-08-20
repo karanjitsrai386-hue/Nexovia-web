@@ -297,8 +297,20 @@
     return '<li><b>' + p[0] + '</b><span><strong>' + p[1] + '</strong>' + p[2] + '</span></li>';
   }).join('') + '</ol>';
 
+  /* No early return on an empty host list any more.
+
+     This file does two separable jobs: it injects the teardown SVG, and it
+     drives every .scrub rig on the page from scroll. Those were coupled by an
+     `if (!hosts.length) return;` here, which was harmless while the teardown was
+     the only scrub in the site — and silently wrong the moment Phase 5.2 added
+     the pinned signal path to the homepage, which has no [data-hive-explode].
+     The rig loop below never ran there: --p stayed unset, no stage ever went
+     live, and the section rendered as a tall empty pin with no error to show
+     for it.
+
+     An empty NodeList forEach is a no-op, so the injection simply does nothing
+     on pages without a host, and the driver runs everywhere. */
   var hosts = document.querySelectorAll('[data-hive-explode], [data-hive-still]');
-  if (!hosts.length) return;
   hosts.forEach(function (h) { h.innerHTML = svg + list; });
 
   /* The viewBox has to change with the breakpoint — CSS cannot touch it, and a
@@ -324,17 +336,63 @@
   var mqSmall  = window.matchMedia('(max-width: 900px)');
   var mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+  /* ---------- Phase 5.1 / 5.2 — chapters off the same --p ----------
+
+     One function serves both items, because they are the same question asked
+     twice: which stage is the scroll currently in.
+
+     A rig opts in with `data-chapters="5"`. The counter element is
+     [data-scrub-counter]; the stacking copy blocks are [data-step], in order.
+
+     `flat` matters. Below 900px, under reduced motion, and on any rig too
+     short to scrub, --p is pinned at 1 so the diagram renders fully open. A
+     counter derived from progress would then read "05 / 05" over a stack the
+     reader has not stepped through, and every step would show as spent. So a
+     flat rig gets the class instead and the CSS shows the blocks plainly. */
+  function paintChapters(rig, p, flat) {
+    var n = parseInt(rig.getAttribute('data-chapters') || '0', 10);
+    if (!n) return;
+
+    rig.classList.toggle('is-flat', !!flat);
+
+    /* p is 0..1 inclusive; at exactly 1 the floor would land one past the end */
+    var i = Math.min(n, Math.floor(p * n) + 1);
+
+    var counter = rig.querySelector('[data-scrub-counter]');
+    if (counter && !flat) {
+      var pad = function (v) { return v < 10 ? '0' + v : String(v); };
+      var txt = '[ ' + pad(i) + ' / ' + pad(n) + ' ]';
+      if (counter.textContent !== txt) counter.textContent = txt;
+    }
+
+    var steps = rig.querySelectorAll('[data-step]');
+    if (!steps.length) return;
+    for (var k = 0; k < steps.length; k++) {
+      /* live = the stage you are in, spent = stages already passed. Nothing is
+         ever removed — the reference stacks copy rather than swapping it. */
+      steps[k].classList.toggle('is-live', !flat && k === i - 1);
+      steps[k].classList.toggle('is-spent', !flat && k < i - 1);
+    }
+  }
+
   var ticking = false;
   function update() {
     ticking = false;
     var alwaysOpen = mqSmall.matches || mqReduce.matches;
     rigs.forEach(function (rig) {
-      if (alwaysOpen) { rig.style.setProperty('--p', '1'); return; }
-      var travel = rig.offsetHeight - window.innerHeight;
-      if (travel <= 0) { rig.style.setProperty('--p', '1'); return; }
-      var p = (window.scrollY - rig.offsetTop) / travel;
-      p = p < 0 ? 0 : p > 1 ? 1 : p;
+      var p, flat = alwaysOpen;
+      if (alwaysOpen) {
+        p = 1;
+      } else {
+        var travel = rig.offsetHeight - window.innerHeight;
+        if (travel <= 0) { p = 1; flat = true; }
+        else {
+          p = (window.scrollY - rig.offsetTop) / travel;
+          p = p < 0 ? 0 : p > 1 ? 1 : p;
+        }
+      }
       rig.style.setProperty('--p', p.toFixed(4));
+      paintChapters(rig, p, flat);
     });
   }
   function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
