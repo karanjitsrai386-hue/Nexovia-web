@@ -102,6 +102,23 @@
     '</g>';
   }
 
+
+  /* ---------- stage group ----------
+     Opens one of the five clickable regions. Two things ride along:
+
+     The hit rect. An SVG <g> only receives pointer events where something is
+     actually painted, so without this you would have to hit a 1.5px camera
+     outline to select a stage. fill-opacity 0 still takes clicks — fill="none"
+     does not — so the rect is invisible and the whole column is a target.
+
+     The marker label. "03 · EDGE INFERENCE" and its siblings used to sit in
+     one shared group outside the five, so they neither dimmed with their
+     stage nor answered a click on the words themselves. */
+  function fxOpen(n, label, hitX, hitW, labelX) {
+    return '<g class="fx" data-fx="' + n + '">' +
+      '<rect class="fx-hit" x="' + hitX + '" y="8" width="' + hitW + '" height="575" fill="#000" fill-opacity="0"/>' +
+      '<text class="fx-label" x="' + labelX + '" y="30" font-family="var(--mono)" font-size="13" letter-spacing="3" fill="' + T3 + '">' + label + '</text>';
+  }
   var svg = '' +
 '<svg class="flow-svg" viewBox="0 0 1920 692" xmlns="http://www.w3.org/2000/svg" role="img" ' +
 'aria-label="Nexovia signal path: IP cameras connect over Cat6 Ethernet and PoE into a network switch, then a single Ethernet run carries every stream into the Nexovia Hive, where feeds are decoded, run through GPU inference and an event engine on-device, then pushed over an encrypted tunnel to the live stream wall and the analytics console. End-to-end latency stays under 50 milliseconds.">' +
@@ -123,16 +140,9 @@
   '</defs>' +
 
   /* ================= stage markers ================= */
-  '<g font-family="var(--mono)" font-size="13" letter-spacing="3" fill="' + T3 + '">' +
-    '<text x="40" y="30">01 · CAPTURE</text>' +
-    '<text x="222" y="30">02 · TRANSPORT</text>' +
-    '<text x="660" y="30" fill="' + A + '">03 · EDGE INFERENCE</text>' +
-    '<text x="1200" y="30">04 · STREAM</text>' +
-    '<text x="1560" y="30">05 · ANALYTICS</text>' +
-  '</g>' +
 
   /* ================= 01 cameras ================= */
-  '<g class="fx" data-fx="1">' +
+  fxOpen(1, '01 · CAPTURE', 8, 182, 40) +
   camera(70,  'CAM_01', 0) +
   camera(180, 'CAM_02', 0.08) +
   camera(290, 'CAM_03', 0.16) +
@@ -143,7 +153,7 @@
   '</g>' +
 
   /* ================= 02 Cat6 runs into the switch ================= */
-  '<g class="fx" data-fx="2">' +
+  fxOpen(2, '02 · TRANSPORT', 190, 465, 222) +
   '<g fill="none" stroke-linecap="round">' +
     /* dark jacket */
     '<path d="M166 104 C 286 104, 300 290, 410 290" stroke="#131922" stroke-width="9"/>' +
@@ -206,7 +216,7 @@
   '</g>' +
 
   /* ================= 03 THE NEXOVIA HIVE ================= */
-  '<g class="fx" data-fx="3">' +
+  fxOpen(3, '03 · EDGE INFERENCE', 655, 440, 660) +
   '<g class="node-in" style="--d:0.6s">' +
     '<rect x="660" y="90" width="430" height="420" rx="10" fill="url(#hiveFill)" stroke="' + A + '" stroke-width="2" filter="url(#hiveGlow)" opacity="0.98"/>' +
     '<rect x="660" y="90" width="430" height="420" rx="10" fill="none" stroke="' + A + '" stroke-width="1" class="pulse-ring"/>' +
@@ -256,7 +266,7 @@
   '</g>' +
 
   /* ================= 04 encrypted tunnel + stream wall ================= */
-  '<g class="fx" data-fx="4">' +
+  fxOpen(4, '04 · STREAM', 1095, 450, 1200) +
   '<g fill="none">' +
     '<path d="M1090 290 H1200" stroke="#131922" stroke-width="9" stroke-linecap="round"/>' +
     '<path d="M1090 290 H1200" stroke="' + A + '" stroke-width="2" opacity="0.6" class="dash-flow"/>' +
@@ -289,7 +299,7 @@
   '</g>' +
 
   /* ================= 05 analytics console ================= */
-  '<g class="fx" data-fx="5">' +
+  fxOpen(5, '05 · ANALYTICS', 1545, 375, 1560) +
   '<g class="node-in" style="--d:0.95s">' +
     '<rect x="1560" y="110" width="320" height="390" rx="8" fill="url(#hiveFill)" stroke="' + BD + '" stroke-width="1.5"/>' +
     '<path d="M1560 152 H1880" stroke="' + BD + '" stroke-width="1.2"/>' +

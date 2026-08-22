@@ -1238,6 +1238,8 @@ img.shot-ui {
   .flow-stage::-webkit-scrollbar { height: 6px; }
   .flow-stage::-webkit-scrollbar-thumb { background: var(--nx-border-lit); }
   .flow-stage > [data-flow] { min-width: 960px; padding-inline: 14px; }
+  /* below 1200 the diagram scrolls horizontally, so say so as well */
+  .path-hint-swipe { display: inline; }
 
   .flow-hint {
     display: flex;
@@ -2899,6 +2901,27 @@ body::after {
 
 .path-art { position: relative; min-width: 0; }
 
+/* Says out loud that the diagram is clickable. An SVG has no affordance of
+   its own beyond the cursor, and the cursor only helps once you are already
+   hovering the right place. */
+.path-hint {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  padding-top: 14px;
+  font-size: 13.5px;
+  color: var(--text-4);
+}
+.path-hint::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--nx-accent-low);
+  flex: none;
+}
+.path-hint-swipe { display: none; }
+
 /* The oversized outline numeral stays — kept deliberately. It moved off
    .scrub-numeral when this section stopped being a scrub, but the treatment is
    unchanged: outline rather than fill so it reads as a graphic and never
@@ -2923,12 +2946,27 @@ body::after {
 
 /* the picked stage lights, the rest recede — the whole path stays drawn */
 .flow-svg .fx { transition: opacity 0.45s var(--ease); }
-[data-flow][data-active] .fx { opacity: 0.24; }
+[data-flow][data-active] .fx { opacity: 0.24; cursor: pointer; }
+
+/* Hovering a dimmed stage lifts it most of the way, which is what tells you
+   the diagram is clickable at all — there is no other affordance on an SVG.
+   This sits BEFORE the picked-stage rules on purpose: the two have equal
+   specificity, so source order decides, and the picked stage must win. */
+[data-flow][data-active] .fx:hover { opacity: 0.66; }
+[data-flow][data-active] .fx:hover .fx-hit { fill-opacity: 0.028; }
+.flow-svg .fx-hit { fill: #fff; transition: fill-opacity 0.25s var(--ease); }
 [data-flow][data-active="1"] .fx[data-fx="1"],
 [data-flow][data-active="2"] .fx[data-fx="2"],
 [data-flow][data-active="3"] .fx[data-fx="3"],
 [data-flow][data-active="4"] .fx[data-fx="4"],
 [data-flow][data-active="5"] .fx[data-fx="5"] { opacity: 1; }
+
+/* the picked stage names itself in the accent, the way the eyebrow does */
+[data-flow][data-active="1"] .fx[data-fx="1"] .fx-label,
+[data-flow][data-active="2"] .fx[data-fx="2"] .fx-label,
+[data-flow][data-active="3"] .fx[data-fx="3"] .fx-label,
+[data-flow][data-active="4"] .fx[data-fx="4"] .fx-label,
+[data-flow][data-active="5"] .fx[data-fx="5"] .fx-label { fill: var(--nx-accent); }
 
 @media (prefers-reduced-motion: reduce) {
   .flow-svg .fx { transition: none; }

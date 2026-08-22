@@ -297,6 +297,24 @@
       t.addEventListener('click', function () { select(i); });
     });
 
+    /* The diagram is a control too: click the Hive, or the cameras, or the
+       console, and that stage opens. Each region carries an invisible hit
+       rect (see fxOpen in flow.js) so the whole column answers, not just the
+       1.5px strokes.
+
+       Delegated to the container rather than bound to the groups, because
+       flow.js injects the SVG AFTER this file runs — anything bound directly
+       would find nothing to bind to. Delegation also survives the diagram
+       being re-injected on a client-side navigation. */
+    if (art) {
+      art.addEventListener('click', function (e) {
+        var g = e.target.closest && e.target.closest('.fx');
+        if (!g) return;
+        var i = parseInt(g.getAttribute('data-fx'), 10) - 1;
+        if (i >= 0 && i < tabs.length) select(i);
+      });
+    }
+
     /* Arrow keys move between stages, which is what a tablist owes a keyboard
        user — and Home/End jump to the ends of the path. */
     rig.querySelector('.path-bar').addEventListener('keydown', function (e) {
