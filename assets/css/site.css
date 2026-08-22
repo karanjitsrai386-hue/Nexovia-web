@@ -90,29 +90,37 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-body::before {
+/* ---------- Atmosphere grid ----------
+   Was `body::before` with `position: fixed`, painting behind the entire
+   document. Two problems with that: pinned to the viewport it does not move
+   when the page does, so it reads as something laid over the screen rather
+   than something the page is built on — and it ran under every band equally,
+   which is a lot of texture for 12,000px of page.
+
+   It is now scoped to the STAGE sections (the hero and the two pinned
+   chapters) and absolutely positioned inside them, so it scrolls with its
+   section and reads as structure. It is also what lets the drawn container
+   verticals go without the measure feeling lost — see .band::before below. */
+.hero-rig::before,
+.scrub::before {
   content: '';
-  position: fixed;
+  position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.014) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.014) 1px, transparent 1px);
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
   background-size: 64px 64px;
   pointer-events: none;
   z-index: 0;
 }
 
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg, transparent, transparent 2px,
-    rgba(0,255,136,0.011) 2px, rgba(0,255,136,0.011) 4px);
-  pointer-events: none;
-  z-index: 9998;
-  mix-blend-mode: screen;
-}
+/* The green scanline wash that used to live on `body::after` is gone.
+
+   It was `mix-blend-mode: screen` over `position: fixed; inset: 0`, so it sat
+   on top of the WHOLE document at z-index 9998 — including every detection
+   still and every playing clip. It put a green cast on the one set of assets
+   whose job is to prove the product, which is a poor trade for a texture
+   nobody was meant to consciously notice. Nothing replaces it. */
 
 img, svg, video { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
@@ -135,10 +143,14 @@ button { font: inherit; cursor: pointer; }
 
 section { position: relative; z-index: 1; }
 
-.band { padding-block: 120px; }
-.band-sm { padding-block: 80px; }
-.band-lg { padding-block: 200px; }
-.band-xs { padding-block: 64px; }
+/* Trimmed 2026-08-22. band-lg at 200px top AND bottom is 400px of air between
+   two sections, which is most of how the homepage reached 12,410px and
+   /platform 11,460px. Both reference sites (Corum, Verkada) run considerably
+   denser than this. The rhythm between the four sizes is preserved. */
+.band { padding-block: 92px; }
+.band-sm { padding-block: 64px; }
+.band-lg { padding-block: 140px; }
+.band-xs { padding-block: 52px; }
 
 .rule { border-top: 1px solid var(--nx-border); }
 
@@ -152,61 +164,85 @@ section { position: relative; z-index: 1; }
 .band-sm.rule,
 .band-xs.rule { background: var(--bg-2); }
 
-/* ---------- Drawn container frame ----------
-   The content column's edges were implied by whitespace. On a light
-   page that reads as air; on near-black it reads as void. Two 1px
-   verticals per band make the measure visible, so full-bleed rules
-   and section grounds visibly cross them. */
+/* ---------- Registration ticks ----------
+   This replaces the drawn container frame: two 1px verticals that ran the FULL
+   HEIGHT of every band on every page. The intent was to make the measure
+   visible on a ground where whitespace reads as void, and it did — but a
+   continuous line repeated down 12,410px of homepage stops being a mark and
+   becomes a fixture you cannot unsee. It was the single most-noticed thing on
+   the site.
+
+   The measure is now marked where it actually means something: the band's
+   opening corners. A 26px L-tick at each, in --nx-accent-low, and nothing in
+   between. Same drafting language, stated once per section instead of
+   continuously. The atmosphere grid on stage sections carries the rest.
+
+   Drawn with one gradient stack per corner on two pseudo-elements so this
+   still needs no extra markup — ::before takes the left corner, ::after the
+   right. `background-repeat: no-repeat` on both is what stops them tiling. */
 .band, .band-sm, .band-lg, .band-xs { position: relative; }
 
 .band::before,
 .band-sm::before,
 .band-lg::before,
-.band-xs::before {
+.band-xs::before,
+.band::after,
+.band-sm::after,
+.band-lg::after,
+.band-xs::after {
   content: '';
   position: absolute;
-  inset: 0;
+  top: 0;
   z-index: 0;
+  width: 26px;
+  height: 26px;
   pointer-events: none;
-  background:
-    linear-gradient(90deg, transparent calc(50% - 680.5px),
-      var(--nx-border) calc(50% - 680.5px) calc(50% - 679.5px), transparent calc(50% - 679.5px)),
-    linear-gradient(90deg, transparent calc(50% + 679.5px),
-      var(--nx-border) calc(50% + 679.5px) calc(50% + 680.5px), transparent calc(50% + 680.5px));
+  background-repeat: no-repeat;
+  background-image:
+    linear-gradient(var(--nx-accent-low), var(--nx-accent-low)),
+    linear-gradient(var(--nx-accent-low), var(--nx-accent-low));
+  background-size: 26px 1px, 1px 26px;
 }
 
-@media (max-width: 1460px) {
-  .band::before,
-  .band-sm::before,
-  .band-lg::before,
-  .band-xs::before {
-    background:
-      linear-gradient(90deg, transparent calc(50% - 50vw + var(--gutter) - 0.5px),
-        var(--nx-border) calc(50% - 50vw + var(--gutter) - 0.5px) calc(50% - 50vw + var(--gutter) + 0.5px),
-        transparent calc(50% - 50vw + var(--gutter) + 0.5px)),
-      linear-gradient(90deg, transparent calc(50% + 50vw - var(--gutter) - 0.5px),
-        var(--nx-border) calc(50% + 50vw - var(--gutter) - 0.5px) calc(50% + 50vw - var(--gutter) + 0.5px),
-        transparent calc(50% + 50vw - var(--gutter) + 0.5px));
-  }
+/* left corner: horizontal arm runs right, vertical arm runs down */
+.band::before,
+.band-sm::before,
+.band-lg::before,
+.band-xs::before {
+  left: max(var(--gutter), calc(50% - 680px));
+  background-position: 0 0, 0 0;
+}
+
+/* right corner mirrors it */
+.band::after,
+.band-sm::after,
+.band-lg::after,
+.band-xs::after {
+  right: max(var(--gutter), calc(50% - 680px));
+  background-position: 100% 0, 100% 0;
 }
 
 @media (max-width: 760px) {
-  .band::before, .band-sm::before, .band-lg::before, .band-xs::before { display: none; }
+  .band::before, .band-sm::before, .band-lg::before, .band-xs::before,
+  .band::after, .band-sm::after, .band-lg::after, .band-xs::after { display: none; }
 }
 
 /* ---------- Typography ---------- */
 
 .eyebrow {
+  /* Mono KEEPS this one — it is the single section marker per band, and a
+     label rather than language. 0.16em instead of 0.28em: at 12px the wider
+     tracking broke the phrase into loose letters. */
   font-family: var(--mono);
   font-size: 12px;
   font-weight: 400;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--nx-accent-mid);
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 11px;
+  margin-bottom: 22px;
 }
 
 .eyebrow::before {
@@ -276,10 +312,13 @@ em, .accent-em {
   max-width: 52ch;
 }
 
+/* Weight 400, not 300. Syne's 300 has thin joins that fill in against a
+   near-black ground at body size; 400 holds them open and reads clearer
+   without reading heavier. */
 .body-copy {
   font-family: var(--sans);
-  font-size: 16px;
-  font-weight: 300;
+  font-size: 16.5px;
+  font-weight: 400;
   line-height: 1.75;
   color: var(--text-2);
 }
@@ -296,10 +335,10 @@ em, .accent-em {
 }
 
 .tag {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   color: var(--text-3);
 }
 
@@ -314,15 +353,27 @@ em, .accent-em {
 
 /* ---------- Buttons ---------- */
 
+/* Syne, sentence case, 0.01em — not mono caps at 0.16em.
+
+   Part of the 2026-08-22 type pass. DM Mono was carrying the nav, every
+   button, every form label, every card caption and the whole footer, all in
+   caps at 0.13–0.28em tracking. Mono earns its place on values you compare
+   character by character (latencies, confidences, camera IDs, spec figures)
+   and on the one eyebrow per section; it does not earn its place on anything
+   that carries language. All-caps at wide tracking is also the slowest setting
+   on the page to read, which is a real cost on the thing you most want clicked.
+
+   The markup already says "Request a demo" in sentence case — the shouting was
+   entirely `text-transform`. */
 .btn {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--mono);
-  font-size: 13px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  padding: 15px 32px;
+  font-family: var(--sans);
+  font-size: 15.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  padding: 15px 30px;
   border: 1px solid transparent;
   transition: background 0.3s var(--ease), color 0.3s var(--ease), box-shadow 0.3s var(--ease), border-color 0.3s var(--ease), transform 0.3s var(--ease);
   white-space: nowrap;
@@ -331,7 +382,7 @@ em, .accent-em {
 .btn-primary {
   background: var(--nx-accent);
   color: #04120b;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .btn-primary:hover {
@@ -381,23 +432,24 @@ em, .accent-em {
 
 /* ---------- Page header (interior pages) ---------- */
 
+/* 128px, not 190px. Under a 64px fixed nav, 190px put roughly two thirds of
+   the opening fold below the headline on a laptop — and this block opens nine
+   pages, so the cost was paid nine times. Together with the .band-lg trim
+   below this removes about a screen and a half per page without cutting a
+   word. Density is part of what reads as sharp. */
 .page-head {
-  padding-top: 190px;
-  padding-bottom: 90px;
+  padding-top: 128px;
+  padding-bottom: 76px;
   position: relative;
   overflow: hidden;
 }
 
-.page-head::after {
-  content: '';
-  position: absolute;
-  top: -30%; left: 50%;
-  transform: translateX(-50%);
-  width: 900px; height: 520px;
-  background: radial-gradient(ellipse, var(--nx-accent-glow) 0%, transparent 68%);
-  pointer-events: none;
-  filter: blur(30px);
-}
+/* The green radial wash that used to sit here is gone.
+
+   It was the identical ellipse behind the headline on all nine interior
+   pages. One page in, it is atmosphere; nine pages in, the eye has learned it
+   carries no information and it reads as wallpaper. The page openings are
+   differentiated by what they actually contain instead. */
 
 /* Two columns. Every interior page opened with the same single left-hand
    column, leaving the right 50% of the fold 63-71% empty. The stat rail
@@ -453,18 +505,18 @@ em, .accent-em {
    stretches a word without making it more legible. Genuinely decorative
    micro-type is left alone. */
 .head-stat span {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   color: var(--text-3);
 }
 
 .crumb {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   color: var(--text-3);
   margin-bottom: 22px;
 }
@@ -523,51 +575,52 @@ em, .accent-em {
 /* The lit cell's mark is the grid's entry point, so it runs at full accent. */
 .grid > .cell:first-child .cell-icon { color: var(--nx-accent); }
 
-/* Hairline octagon marks. SSTR uses large 1px-stroke octagons, no fill, as
-   section graphics rather than boxed UI icons — the shape is a graphic, the
-   box was an affordance. Offset second octagon on every third cell so the
-   grid is not a row of identical stamps. */
+/* ---------- Recessed plate ----------
+   This replaces the hairline octagon and its offset ghost twin.
+
+   The doubled outline was reaching for depth, and depth is worth keeping — but
+   it was drawn as the same shape printed twice with an offset, which the eye
+   reads as misregistration rather than as layers. It was also applied
+   inconsistently on purpose: `:nth-child(2n)` hid the ghost and
+   `:nth-child(3n)` flipped its direction, so a three-up row showed three
+   different marks and the difference read before the icon did.
+
+   Depth now comes from light instead of duplication: a 44px well with a 1px
+   highlight along the top edge and an inset shadow at the bottom, so the glyph
+   sits IN the surface. It is identical on every cell, which is most of the
+   fix, and it survives at 44px on a phone where a 76px octagon could not. */
 .cell-icon {
-  width: 76px;
-  height: 76px;
-  border: none;
-  background: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Cpath d=%27M30 1.5H70L98.5 30V70L70 98.5H30L1.5 70V30Z%27 fill=%27none%27 stroke=%27%232c6b4c%27 stroke-width=%271.6%27/%3E%3C/svg%3E") center / contain no-repeat;
+  width: 44px;
+  height: 44px;
+  background: #070a0e;
+  border: 1px solid var(--nx-border);
+  border-top-color: var(--nx-border-lit);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    inset 0 -8px 14px rgba(0, 0, 0, 0.5);
   display: grid;
   place-items: center;
-  margin-bottom: 26px;
+  margin-bottom: 22px;
   position: relative;
   color: var(--nx-accent-mid);
-  transition: color 0.35s;
+  transition: color 0.35s, border-color 0.35s;
 }
 
-.cell-icon::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Cpath d=%27M30 1.5H70L98.5 30V70L70 98.5H30L1.5 70V30Z%27 fill=%27none%27 stroke=%27%2329323f%27 stroke-width=%271.6%27/%3E%3C/svg%3E") center / contain no-repeat;
-  transform: translate(-11px, 7px);
+.cell:hover .cell-icon {
+  color: var(--nx-accent);
+  border-color: var(--nx-accent-low);
 }
 
-/* The glyph rides above the ghost outline rather than being crossed by it. */
-.cell-icon svg { position: relative; z-index: 1; }
-
-.cell:nth-child(3n) .cell-icon::before { transform: translate(11px, -7px); }
-.cell:nth-child(2n) .cell-icon::before { display: none; }
-
-.cell:hover .cell-icon { color: var(--nx-accent); }
-
-
-
-.cell-icon svg { width: 26px; height: 26px; }
+.cell-icon svg { width: 20px; height: 20px; }
 
 .cell h3, .cell .h3 { margin-bottom: 12px; font-size: 20px; }
 .cell p { font-family: var(--sans); font-size: 16px; font-weight: 300; line-height: 1.7; color: var(--text-3); }
 
 .cell-foot {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   color: var(--nx-accent-mid);
   align-self: stretch;
   margin-top: auto;
@@ -789,7 +842,7 @@ img.shot-ui {
   display: block;
   font-family: var(--mono);
   font-size: 11px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--nx-accent-mid);
   margin-bottom: 18px;
@@ -808,10 +861,10 @@ img.shot-ui {
 .stat-n i { font-style: normal; color: var(--nx-accent); font-size: 0.32em; letter-spacing: 0; }
 
 .stat-l {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   color: var(--text-3);
 }
 
@@ -893,9 +946,10 @@ img.shot-ui {
 .foot-brand p { font-family: var(--sans); font-size: 15px; font-weight: 300; line-height: 1.65; color: var(--text-3); max-width: 34ch; }
 
 .foot-col h2 {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.22em;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--nx-accent-mid);
   margin-bottom: 20px;
@@ -903,7 +957,7 @@ img.shot-ui {
 }
 
 .foot-col ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
-.foot-col a { font-family: var(--mono); font-size: 13.5px; font-weight: 300; color: var(--text-3); transition: color 0.25s; }
+.foot-col a { font-family: var(--sans); font-size: 14.5px; font-weight: 400; color: var(--text-3); transition: color 0.25s; }
 .foot-col a:hover { color: var(--nx-accent); }
 
 .foot-bar {
@@ -1013,10 +1067,10 @@ img.shot-ui {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--text-2);
   border: 1px solid var(--nx-border-lit);
   background: rgba(5,7,10,0.55);
@@ -1229,10 +1283,10 @@ img.shot-ui {
 .flow-caption {
   position: absolute;
   top: 18px; right: 22px;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   color: var(--nx-accent);
   opacity: 0.55;
   z-index: 2;
@@ -1295,23 +1349,6 @@ img.shot-ui {
   border-top: none;
 }
 
-.leg {
-  background: var(--bg);
-  padding: 26px 22px;
-  transition: background 0.35s;
-}
-.leg:hover { background: var(--surface); }
-
-.leg-n {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.2em;
-  color: var(--nx-accent-mid);
-  margin-bottom: 10px;
-}
-
-.leg h4, .leg .h4 { font-size: 15px; margin-bottom: 7px; }
-.leg p { font-family: var(--sans); font-size: 15px; font-weight: 300; line-height: 1.65; color: var(--text-3); }
 
 /* ============================================================
    Hive exploded view — scroll-scrubbed teardown
@@ -1498,127 +1535,6 @@ img.shot-ui {
   .scrub-reg, .scrub-rule { display: none; }
 }
 
-/* ---- 5.7 the light inversion chapter — BUILT, THEN REVERTED 2026-08-19 ----
-
-   The rules that were here re-grounded one homepage band to a light palette by
-   swapping --bg / --text / --nx-border / the accent tiers on a single element.
-   It worked and it measured clean (h2 18.3:1, body 10.8:1, button 6.2:1), but
-   the client cut it, and the plan had explicitly offered that cut.
-
-   The reason it did not land is worth keeping: Phase 7 argues premium reads as
-   restraint rather than lightness, and that Coram and Verkada look like each
-   other precisely BECAUSE they are both light. One white band in a long dark
-   scroll read as a break in the system rather than a deliberate chapter.
-
-   Removed rather than commented out — a full alternate palette left dormant in
-   the sheet is a trap for whoever next adds a class called "invert".
-
-   The one thing kept is the --heading token in :root. h1-h4 and .spec-v strong
-   hardcoded #fff, so no heading could follow ANY change of ground; this band
-   is what exposed that, but the fix stands on its own. */
-
-/* ---- 5.2 the pinned signal path ---- */
-.flow-pin {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: minmax(300px, 27%) 1fr;
-  gap: 48px;
-  align-items: center;
-  width: 100%;
-}
-
-.flow-rail {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  border-left: 1px solid var(--nx-border);
-}
-
-/* The rail's blocks stack rather than swap: all five stay, and contrast alone
-   says where you are. is-live and is-spent are set from --p by
-   paintChapters() in hive-explode.js. */
-.flow-rail .leg {
-  background: none;
-  padding: 12px 0 12px 20px;
-  margin-left: -1px;
-  border-left: 1px solid transparent;
-  opacity: 0.34;
-  transition: opacity 0.45s var(--ease), border-color 0.45s var(--ease);
-}
-.flow-rail .leg:hover { background: none; }
-/* Spent stages STAY. The reference stacks copy rather than swapping it, and
-   5.2 is explicit: "none removed". A stage that has gone by keeps its
-   paragraph, just quieter — the rail reads as an accumulating account of one
-   frame's journey, not as a slideshow. Upcoming stages show their heading only,
-   so the whole path is visible from the start without pre-empting itself. */
-.flow-rail .leg.is-spent { opacity: 0.62; border-left-color: var(--nx-border-lit); }
-.flow-rail .leg.is-live  { opacity: 1;   border-left-color: var(--nx-accent); }
-
-.flow-rail .leg h4, .flow-rail .leg .h4 { margin: 0 0 6px; font-size: 17px; }
-.flow-rail .leg > p {
-  font-family: var(--sans);
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--text-3);
-  margin: 0;
-  /* Spent stages keep their heading and give the space back to the live one.
-
-     max-height, not grid-template-rows: 0fr. The grid trick only collapses a
-     real child element, and this <p> holds raw text, so the browser wraps it in
-     an ANONYMOUS grid item that the row sizing does not reach. The result was a
-     paragraph that faded to opacity 0 but kept its full height — the rail was
-     hidden text separated by ~130px of dead space. max-height collapses it for
-     real without needing a wrapper element in the markup. */
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  /* font-size is deliberately NOT transitioned. Tweening it relays out the
-     text on every frame of the transition, on five paragraphs, inside the
-     pinned rail — and it fires exactly when a chapter changes, which is the
-     busiest moment of the scrub. The step down to 13px still happens, it just
-     lands rather than tweens, and under a moving stage nobody can tell.
-     max-height stays: see the note above on why grid-template-rows cannot
-     collapse a bare text node. */
-  transition: max-height 0.45s var(--ease), opacity 0.35s var(--ease);
-}
-/* arrived — and it stays arrived */
-.flow-rail .leg.is-live > p  { max-height: 9em; opacity: 1; }
-/* Spent copy is kept but set a step smaller and tighter. That is what buys the
-   room for all five to be open at once inside a 100vh stage: five paragraphs at
-   full size overflow a short viewport, and .scrub-stage clips rather than
-   scrolls. */
-.flow-rail .leg.is-spent > p { max-height: 9em; opacity: 1; font-size: 13px; line-height: 1.5; }
-
-/* latency bar — the same 6/9/23/4/8 that sums to the hero's <50ms */
-.leg-lat {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-  height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: height 0.4s var(--ease), opacity 0.4s var(--ease);
-}
-.flow-rail .leg.is-live .leg-lat { height: 14px; opacity: 1; }
-.leg-lat i {
-  display: block;
-  height: 2px;
-  width: var(--w, 10%);
-  background: var(--nx-accent);
-  flex: none;
-}
-.leg-lat b {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.14em;
-  color: var(--nx-accent-mid);
-}
-
-.flow-art { position: relative; min-width: 0; }
-.flow-art .flow-stage { max-height: 62vh; }
 
 /* Short viewports: the stage is pinned at top:0 and its contents are centred,
    so on a laptop screen the accumulated rail grows up past the fixed nav and
@@ -1870,10 +1786,10 @@ img.shot-ui {
   padding: 20px 18px;
   text-align: left;
   color: var(--text-3);
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   transition: background 0.3s, color 0.3s;
   position: relative;
 }
@@ -1956,7 +1872,7 @@ img.shot-ui {
   font-size: 12.5px;
 }
 .det-meta li:last-child { border-bottom: none; }
-.det-meta span { color: var(--text-3); letter-spacing: 0.1em; text-transform: uppercase; font-size: 11px; }
+.det-meta span { font-family: var(--sans); font-weight: 500; color: var(--text-3); letter-spacing: 0.01em; font-size: 13.5px; }
 .det-meta b { color: var(--nx-accent); font-weight: 400; }
 
 .det-pane[hidden] { display: none; }
@@ -1969,15 +1885,16 @@ img.shot-ui {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.9);
-  background: rgba(0,0,0,0.6);
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: rgba(255,255,255,0.92);
+  background: rgba(0,0,0,0.62);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255,255,255,0.14);
-  padding: 6px 12px;
+  padding: 7px 13px;
   pointer-events: none;
 }
 .play-badge::before {
@@ -2070,10 +1987,10 @@ img.shot-ui {
 .spec-k {
   padding: 26px 30px;
   border-right: 1px solid var(--nx-border);
-  font-family: var(--mono);
-  font-size: 12.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--nx-accent-mid);
   display: flex;
   align-items: center;
@@ -2218,9 +2135,10 @@ img.shot-ui {
 .price-flag {
   position: absolute;
   top: 0; right: 0;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.2em;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   background: var(--nx-accent);
   color: var(--bg);
@@ -2399,10 +2317,10 @@ img.shot-ui {
    ::placeholder below). */
 .field label {
   display: block;
-  font-family: var(--mono);
-  font-size: 13px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   color: var(--text-2);
   margin-bottom: 10px;
 }
@@ -2412,9 +2330,9 @@ img.shot-ui {
   background: var(--surface);
   border: 1px solid var(--nx-border);
   color: var(--text);
-  font-family: var(--mono);
-  font-size: 14px;
-  font-weight: 300;
+  font-family: var(--sans);
+  font-size: 15.5px;
+  font-weight: 400;
   padding: 14px 16px;
   transition: border-color 0.3s, background 0.3s;
   border-radius: 0;
@@ -2506,16 +2424,16 @@ img.shot-ui {
 .member-av img { width: 100%; height: 100%; object-fit: cover; }
 
 .member h4 { font-size: 18px; margin-bottom: 5px; }
-.member .role { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--nx-accent-mid); margin-bottom: 16px; }
+.member .role { font-family: var(--sans); font-size: 14px; font-weight: 500; letter-spacing: 0.01em; color: var(--nx-accent-mid); margin-bottom: 16px; }
 .member p { font-family: var(--sans); font-size: 15px; font-weight: 300; line-height: 1.65; color: var(--text-3); }
 
 .placeholder-note {
   border: 1px dashed var(--nx-border-lit);
   background: rgba(255,176,32,0.035);
   padding: 20px 24px;
-  font-family: var(--mono);
-  font-size: 12.5px;
-  font-weight: 300;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 400;
   line-height: 1.75;
   color: var(--warn);
   margin-bottom: 32px;
@@ -2553,10 +2471,10 @@ img.shot-ui {
 
 /* under a bio */
 .soon-inline {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--text-3);
   opacity: 0.72;
   margin-top: 14px;
@@ -2574,10 +2492,10 @@ img.shot-ui {
 /* inline chip inside a spec table cell */
 .soon {
   display: inline-block;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--nx-accent);
   border: 1px solid var(--nx-border-lit);
   background: rgba(0, 255, 136, 0.05);
@@ -2633,10 +2551,10 @@ img.shot-ui {
 .ind-visual .chip {
   position: absolute;
   top: 12px; right: 12px;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   background: rgba(0,0,0,0.7);
   backdrop-filter: blur(6px);
   border: 1px solid rgba(0,255,136,0.3);
@@ -2671,10 +2589,10 @@ img.shot-ui {
 
 .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: auto; }
 .chips span {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   color: var(--text-3);
   border: 1px solid var(--nx-border);
   padding: 5px 10px;
@@ -2734,10 +2652,10 @@ img.shot-ui {
 @keyframes slide { to { transform: translateX(-50%); } }
 
 .marquee-track span {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   color: var(--text-4);
   white-space: nowrap;
   display: flex;
@@ -2850,3 +2768,199 @@ body::after {
 }
 
 @media (prefers-reduced-motion: reduce) { body::after { display: none; } }
+
+/* ============================================================
+   THE SIGNAL PATH — clicked, not scrubbed  (2026-08-22)
+   ============================================================
+
+   Replaces the pinned five-chapter scrub on the homepage. The rationale is in
+   the markup comment in src/pages/index.astro; this is only the dressing.
+
+   The one idea worth protecting if this gets refactored: the segment widths
+   are the latency budget, set inline as --w (12/18/46/8/16 = 6/9/23/4/8 ms of
+   50). The picker is a data graphic that happens to be clickable, not a row of
+   tabs that happens to sit above a chart. Do not equalise them. */
+
+.path-pick { margin-top: 52px; }
+
+.path-bar {
+  display: flex;
+  gap: 2px;
+  /* 88px, measured not guessed: the three stacked labels come to 82.6px at
+     the body line-height, so 76px clipped every latency figure — the one
+     number in the component that has to be readable. Line-heights below are
+     pinned for the same reason, so a change to the body leading cannot
+     silently re-clip this. */
+  height: 88px;
+}
+
+.path-seg {
+  width: var(--w, 20%);
+  min-width: 0;
+  background: var(--bg-2);
+  border: none;
+  border-top: 2px solid var(--nx-border-lit);
+  padding: 13px 15px;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+
+.path-seg:hover { background: var(--surface); }
+.path-seg:focus-visible { outline: 2px solid var(--nx-accent); outline-offset: -2px; }
+
+.path-seg.is-on {
+  background: var(--surface-2);
+  border-top-color: var(--nx-accent);
+}
+
+.path-n {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.2;
+  letter-spacing: 0.16em;
+  color: var(--text-4);
+  white-space: nowrap;
+}
+.path-seg.is-on .path-n { color: var(--nx-accent-mid); }
+
+.path-t {
+  display: block;
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 600;
+  color: var(--text-3);
+  margin-top: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.path-seg.is-on .path-t { color: var(--heading); }
+
+.path-ms {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.2;
+  color: var(--text-4);
+  margin-top: 7px;
+}
+.path-seg.is-on .path-ms { color: var(--nx-accent); }
+
+.path-scale {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-4);
+}
+.path-total { font-family: var(--mono); font-size: 12.5px; color: var(--text-3); }
+.path-total b { color: var(--nx-accent); font-weight: 400; }
+
+.path-body {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 56px;
+  margin-top: 44px;
+  align-items: start;
+}
+
+.path-leg[hidden] { display: none; }
+.path-leg h3, .path-leg .h3 { margin-bottom: 14px; }
+.path-leg > p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text-2);
+  margin-bottom: 26px;
+}
+
+/* key/value rows — the keys are language and set in Syne, the values are
+   compared character by character and stay mono */
+.path-spec { border-top: 1px solid var(--nx-border); }
+.path-spec > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--nx-border);
+}
+.path-spec dt { font-size: 13.5px; color: var(--text-3); }
+.path-spec dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text);
+  text-align: right;
+}
+
+.path-art { position: relative; min-width: 0; }
+
+/* The oversized outline numeral stays — kept deliberately. It moved off
+   .scrub-numeral when this section stopped being a scrub, but the treatment is
+   unchanged: outline rather than fill so it reads as a graphic and never
+   competes with the copy, unlabelled and deliberately unexplained. Its
+   siblings on /hive (.scrub-numeral, .scrub-word) are untouched. */
+.path-figure {
+  position: absolute;
+  right: 0;
+  bottom: -22px;
+  z-index: 0;
+  margin: 0;
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: clamp(64px, 9vw, 152px);
+  line-height: 0.8;
+  letter-spacing: -0.03em;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--nx-border-lit);
+  user-select: none;
+  pointer-events: none;
+}
+
+/* the picked stage lights, the rest recede — the whole path stays drawn */
+.flow-svg .fx { transition: opacity 0.45s var(--ease); }
+[data-flow][data-active] .fx { opacity: 0.24; }
+[data-flow][data-active="1"] .fx[data-fx="1"],
+[data-flow][data-active="2"] .fx[data-fx="2"],
+[data-flow][data-active="3"] .fx[data-fx="3"],
+[data-flow][data-active="4"] .fx[data-fx="4"],
+[data-flow][data-active="5"] .fx[data-fx="5"] { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-svg .fx { transition: none; }
+}
+
+@media (max-width: 1100px) {
+  .path-body { grid-template-columns: minmax(260px, 34%) minmax(0, 1fr); gap: 32px; }
+}
+
+@media (max-width: 900px) {
+  /* Diagram first, then the picker, then the copy — same reading order the
+     section has always had: show the path, then explain its stages.
+
+     align-items MUST be reset to stretch here. The base rule sets
+     align-items:start, which is right for the two-column grid (top-align
+     the copy against the diagram) — but the moment this becomes a flex
+     COLUMN the cross axis is width, and start shrink-wraps every item to
+     max-content. The diagram carries min-width:960px below 1200, so
+     .path-art measured 986px inside a 346px parent and pushed the whole
+     document to 1008px wide; the fixed nav then overflowed on every phone
+     size. Measured, not guessed — scripts/mobile-check.mjs caught it on
+     all three viewports. */
+  .path-body { display: flex; flex-direction: column; align-items: stretch; gap: 28px; }
+  .path-art { order: -1; min-width: 0; max-width: 100%; }
+  .path-bar { height: 68px; gap: 1px; }
+  /* Every segment clears 44px even at 8% of a 390px screen. */
+  .path-seg { min-width: 56px; padding: 9px 8px; }
+  .path-t { display: none; }
+  .path-n { font-size: 11px; }
+  .path-ms { margin-top: 6px; font-size: 12px; }
+  .path-scale { font-size: 12px; }
+  .path-pick { margin-top: 36px; }
+  /* same call the pinned rig made: below 900 the numeral collides with copy */
+  .path-figure { display: none; }
+}

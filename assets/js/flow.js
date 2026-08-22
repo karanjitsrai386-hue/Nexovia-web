@@ -132,6 +132,7 @@
   '</g>' +
 
   /* ================= 01 cameras ================= */
+  '<g class="fx" data-fx="1">' +
   camera(70,  'CAM_01', 0) +
   camera(180, 'CAM_02', 0.08) +
   camera(290, 'CAM_03', 0.16) +
@@ -139,7 +140,10 @@
   '<text x="103" y="530" font-family="var(--mono)" font-size="13" fill="' + T3 + '" text-anchor="middle" letter-spacing="1.6">ANY IP CAMERA</text>' +
   '<text x="103" y="550" font-family="var(--mono)" font-size="11" fill="var(--text-4)" text-anchor="middle" letter-spacing="1.4">KEEP WHAT YOU OWN</text>' +
 
+  '</g>' +
+
   /* ================= 02 Cat6 runs into the switch ================= */
+  '<g class="fx" data-fx="2">' +
   '<g fill="none" stroke-linecap="round">' +
     /* dark jacket */
     '<path d="M166 104 C 286 104, 300 290, 410 290" stroke="#131922" stroke-width="9"/>' +
@@ -199,7 +203,10 @@
   '<text x="590" y="360" font-family="var(--mono)" font-size="12" fill="' + A + '" text-anchor="middle" letter-spacing="1.4">RJ45</text>' +
   '<text x="590" y="378" font-family="var(--mono)" font-size="10.5" fill="var(--text-4)" text-anchor="middle" letter-spacing="1.2">ONE UPLINK</text>' +
 
+  '</g>' +
+
   /* ================= 03 THE NEXOVIA HIVE ================= */
+  '<g class="fx" data-fx="3">' +
   '<g class="node-in" style="--d:0.6s">' +
     '<rect x="660" y="90" width="430" height="420" rx="10" fill="url(#hiveFill)" stroke="' + A + '" stroke-width="2" filter="url(#hiveGlow)" opacity="0.98"/>' +
     '<rect x="660" y="90" width="430" height="420" rx="10" fill="none" stroke="' + A + '" stroke-width="1" class="pulse-ring"/>' +
@@ -246,7 +253,10 @@
     '<text x="875" y="484" font-family="var(--mono)" font-size="12.5" fill="' + A + '" text-anchor="middle" letter-spacing="2.4" opacity="0.8">RUNS ON-DEVICE · NO CLOUD ROUND TRIP</text>' +
   '</g>' +
 
-  /* ================= encrypted tunnel out ================= */
+  '</g>' +
+
+  /* ================= 04 encrypted tunnel + stream wall ================= */
+  '<g class="fx" data-fx="4">' +
   '<g fill="none">' +
     '<path d="M1090 290 H1200" stroke="#131922" stroke-width="9" stroke-linecap="round"/>' +
     '<path d="M1090 290 H1200" stroke="' + A + '" stroke-width="2" opacity="0.6" class="dash-flow"/>' +
@@ -276,7 +286,10 @@
     '<circle r="3.6" fill="' + A + '"><animateMotion dur="1.1s" repeatCount="indefinite" path="M1490 300 H1560"/></circle>' +
   '</g>' +
 
+  '</g>' +
+
   /* ================= 05 analytics console ================= */
+  '<g class="fx" data-fx="5">' +
   '<g class="node-in" style="--d:0.95s">' +
     '<rect x="1560" y="110" width="320" height="390" rx="8" fill="url(#hiveFill)" stroke="' + BD + '" stroke-width="1.5"/>' +
     '<path d="M1560 152 H1880" stroke="' + BD + '" stroke-width="1.2"/>' +
@@ -306,6 +319,8 @@
     '<text x="1816" y="400" font-family="var(--mono)" font-size="10" fill="' + T3 + '" letter-spacing="1.2">REVIEWED</text>' +
     '<text x="1580" y="468" font-family="var(--mono)" font-size="11.5" fill="' + T3 + '" letter-spacing="1.2">Search: “red hoodie, aisle 3, after 4pm”</text>' +
     '<rect x="1576" y="454" width="2" height="18" fill="' + A + '" class="blink"/>' +
+  '</g>' +
+
   '</g>' +
 
   /* ================= latency budget strip ================= */

@@ -260,3 +260,59 @@
   });
 
 })();
+
+/* ============================================================
+   Signal path — click a stage  (2026-08-22)
+   ============================================================
+
+   Replaces the scroll-scrub that used to drive this section. See the markup
+   comment in src/pages/index.astro for why.
+
+   Element-guarded like everything else in this file, because Base.astro
+   re-executes these scripts on every client-side navigation and the homepage
+   is not the only page that loads them. */
+(function () {
+  'use strict';
+
+  document.querySelectorAll('[data-path]').forEach(function (rig) {
+    var tabs = [].slice.call(rig.querySelectorAll('.path-seg'));
+    var legs = [].slice.call(rig.querySelectorAll('.path-leg'));
+    var art  = rig.querySelector('[data-flow]');
+    if (!tabs.length || tabs.length !== legs.length) return;
+
+    function select(i) {
+      tabs.forEach(function (t, k) {
+        var on = k === i;
+        t.classList.toggle('is-on', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        /* roving tabindex: only the selected tab is in the tab order, so Tab
+           leaves the group rather than walking all five. */
+        t.tabIndex = on ? 0 : -1;
+        legs[k].hidden = !on;
+      });
+      if (art) art.setAttribute('data-active', String(i + 1));
+    }
+
+    tabs.forEach(function (t, i) {
+      t.addEventListener('click', function () { select(i); });
+    });
+
+    /* Arrow keys move between stages, which is what a tablist owes a keyboard
+       user — and Home/End jump to the ends of the path. */
+    rig.querySelector('.path-bar').addEventListener('keydown', function (e) {
+      var i = tabs.indexOf(document.activeElement);
+      if (i < 0) return;
+      var next = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (i + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (i - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = tabs.length - 1;
+      if (next === null) return;
+      e.preventDefault();
+      select(next);
+      tabs[next].focus();
+    });
+
+    select(0);
+  });
+})();

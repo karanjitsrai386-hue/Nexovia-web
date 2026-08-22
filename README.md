@@ -50,8 +50,8 @@ a clone of this repo, commit and push.
 
 ## What is in here
 
-9 prerendered routes — `/`, `/platform`, `/hive`, `/capabilities`,
-`/industries`, `/pricing`, `/pilot`, `/about`, `/contact` — plus `assets/`
+10 prerendered routes — `/`, `/platform`, `/hive`, `/capabilities`,
+`/industries`, `/pricing`, `/pilot`, `/about`, `/contact`, `/privacy` — plus `assets/`
 (CSS, JS, images, video, the Three.js vendor bundle) and `_astro/` (hashed
 bundles). No server, no runtime dependencies.
 
