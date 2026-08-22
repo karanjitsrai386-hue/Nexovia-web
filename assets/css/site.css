@@ -957,7 +957,11 @@ img.shot-ui {
 }
 
 .foot-col ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
-.foot-col a { font-family: var(--sans); font-size: 14.5px; font-weight: 400; color: var(--text-3); transition: color 0.25s; }
+/* overflow-wrap because the Company and Get started columns now carry the full
+   email addresses rather than "Email Prabhjeev". At 37 characters those set a
+   min-content floor wider than the column, which is the same thing that pushed
+   /privacy past the viewport at 320px and made mobile Safari shrink the page. */
+.foot-col a { font-family: var(--sans); font-size: 14.5px; font-weight: 400; color: var(--text-3); transition: color 0.25s; overflow-wrap: anywhere; }
 .foot-col a:hover { color: var(--nx-accent); }
 
 .foot-bar {
