@@ -42,7 +42,12 @@ const DEFAULT_TO = 'prabhjeev@nexoviasecuritysolution.com,karanjit@nexoviasecuri
 const DEFAULT_FROM = 'Nexovia site <site@nexoviasecuritysolution.com>';
 
 /* Field -> label. Also the allow-list: anything not named here is dropped, so a
-   bot posting extra fields cannot inject content into the email body. */
+   bot posting extra fields cannot inject content into the email body.
+
+   Both forms post here. /contact asks the demo set; /pilot/apply asks the demo
+   set plus the pilot-specific questions below it, and sends form_type=pilot so
+   the subject line says which arrived. A field missing from a given form is
+   simply absent from the email — get() returns '' and the line is skipped. */
 const FIELDS: Record<string, string> = {
   name: 'Name',
   email: 'Email',
@@ -52,6 +57,15 @@ const FIELDS: Record<string, string> = {
   cameras: 'Camera count',
   camera_models: 'Camera makes & models',
   problem: 'What they are tired of finding out late',
+
+  /* pilot application only */
+  site_city: 'Site location',
+  prove: 'What the pilot has to prove',
+  contact_person: 'Named contact for feedback',
+  start_when: 'Could start',
+  sites_total: 'Sites operated',
+  nvr: 'Existing NVR / VMS',
+  footage: 'Footage they can share',
 };
 
 const json = (body: unknown, status = 200) =>
@@ -104,7 +118,10 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
     return json({ ok: false, reason: 'unconfigured' }, 503);
   }
 
-  const subject = `Demo request — ${get('company') || name}`;
+  /* form_type is not in FIELDS on purpose — it steers the subject line rather
+     than appearing as a line in the body. */
+  const isPilot = get('form_type') === 'pilot';
+  const subject = `${isPilot ? 'PILOT application' : 'Demo request'} — ${get('company') || name}`;
   const text = lines.join('\n');
   const html = `<pre style="font:14px/1.6 ui-monospace,monospace;white-space:pre-wrap">${esc(text)}</pre>`;
 
