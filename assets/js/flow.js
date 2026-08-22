@@ -117,7 +117,8 @@
   function fxOpen(n, label, hitX, hitW, labelX) {
     return '<g class="fx" data-fx="' + n + '">' +
       '<rect class="fx-hit" x="' + hitX + '" y="8" width="' + hitW + '" height="575" fill="#000" fill-opacity="0"/>' +
-      '<text class="fx-label" x="' + labelX + '" y="30" font-family="var(--mono)" font-size="13" letter-spacing="3" fill="' + T3 + '">' + label + '</text>';
+      '<text class="fx-label" x="' + labelX + '" y="30" font-family="var(--mono)" font-size="13" letter-spacing="3" fill="' + T3 + '">' + label + '</text>' +
+      '<rect class="fx-rule" x="' + labelX + '" y="38" width="' + (label.length * 8.1) + '" height="1.5" fill="var(--nx-accent)"/>';
   }
   var svg = '' +
 '<svg class="flow-svg" viewBox="0 0 1920 692" xmlns="http://www.w3.org/2000/svg" role="img" ' +

@@ -334,3 +334,64 @@
     select(0);
   });
 })();
+
+/* ============================================================
+   AI detection overlay + hold-on-detection  (2026-08-22)
+   ============================================================
+
+   For a clip whose box is NOT burned into the export. The box is declared in
+   the markup next to its <video> with the geometry and the second it lands:
+
+     <div class="ai-box" data-at="2.9" style="--l:22%;--t:52%;--w:58%;--h:46%">
+
+   Two jobs. Show the box once the video passes data-at, and hide it again when
+   the clip loops so it never sits over an empty floor.
+
+   And hold. The fall lands at 2.9s in a 3.4s clip, so the detected state would
+   flash for half a second and restart — the one moment the clip exists to show.
+   On reaching the end the video pauses on the last frame with the box up, waits,
+   then replays. That is also closer to what the product does: the alert stays up
+   until something clears it, rather than scrolling past. */
+(function () {
+  'use strict';
+
+  var HOLD_MS = 1500;
+
+  document.querySelectorAll('.det-video .ai-box').forEach(function (box) {
+    var stage = box.parentElement;
+    var v = stage ? stage.querySelector('video') : null;
+    if (!v) return;
+
+    var at = parseFloat(box.getAttribute('data-at'));
+    if (isNaN(at)) return;
+
+    var holding = false;
+
+    v.addEventListener('timeupdate', function () {
+      box.classList.toggle('is-on', v.currentTime >= at);
+
+      /* Not `ended` — the video carries `loop`, so it never fires. Catching it
+         just before the end is what lets the last frame be held. */
+      if (!holding && v.duration && v.currentTime >= v.duration - 0.06) {
+        holding = true;
+        v.pause();
+        setTimeout(function () {
+          holding = false;
+          /* Only resume if the clip is still the visible one; the pane may have
+             been switched away from, and the IntersectionObserver above owns
+             play/pause in that case. */
+          var pane = v.closest('.det-pane');
+          if (pane && pane.hidden) { box.classList.remove('is-on'); v.currentTime = 0; return; }
+          v.currentTime = 0;
+          box.classList.remove('is-on');
+          v.play().catch(function () {});
+        }, HOLD_MS);
+      }
+    });
+
+    /* switching tabs away and back should start clean */
+    v.addEventListener('play', function () {
+      if (v.currentTime < at) box.classList.remove('is-on');
+    });
+  });
+})();

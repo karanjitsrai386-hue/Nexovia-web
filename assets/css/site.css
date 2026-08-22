@@ -2692,7 +2692,19 @@ img.shot-ui {
   .page-head .wrap { grid-template-columns: 1fr; gap: 44px; }
   .page-head .head-stats { grid-column: 1; grid-row: auto; }
 
-  .g2, .g3, .g4, .grid { grid-template-columns: 1fr; }
+  /* minmax(0, 1fr), not 1fr.
+
+     A bare 1fr is minmax(auto, 1fr), and that auto floor is min-content — so
+     any single unbreakable string inside a cell sets the track width and the
+     track refuses to shrink below it. On /privacy the string was
+     "prabhjeev@nexoviasecuritysolution.com": at 320px the grid was 276px wide
+     and the cell measured 311, pushing the document to 334 and giving mobile
+     Safari a reason to shrink the whole page to fit — which is what "the site
+     shows up as desktop" looks like. minmax(0, …) lets the track shrink and
+     the wrap rule below breaks the address instead. */
+  .g2, .g3, .g4, .grid { grid-template-columns: minmax(0, 1fr); }
+  /* long addresses and URLs break rather than widen their container */
+  .cell, .cell p, .cell a { overflow-wrap: anywhere; }
   .stats { grid-template-columns: 1fr 1fr; }
   .stat { border-bottom: 1px solid var(--nx-border); }
   .stat:nth-child(2n) { border-right: none; }
@@ -2944,22 +2956,25 @@ body::after {
   pointer-events: none;
 }
 
-/* the picked stage lights, the rest recede — the whole path stays drawn */
-.flow-svg .fx { transition: opacity 0.45s var(--ease); }
-[data-flow][data-active] .fx { opacity: 0.24; cursor: pointer; }
+/* ---------- stage emphasis ----------
+   The whole path stays fully lit. An earlier version dimmed the four stages
+   you were not on to 0.24 and lit one — which made the diagram read as a
+   slideshow with four stages switched off, when the point of drawing the
+   whole path is that it is one continuous journey you can see at once.
 
-/* Hovering a dimmed stage lifts it most of the way, which is what tells you
-   the diagram is clickable at all — there is no other affordance on an SVG.
-   This sits BEFORE the picked-stage rules on purpose: the two have equal
-   specificity, so source order decides, and the picked stage must win. */
-[data-flow][data-active] .fx:hover { opacity: 0.66; }
-[data-flow][data-active] .fx:hover .fx-hit { fill-opacity: 0.028; }
+   Selection is now marked, not spotlit: the picked stage gets its label in
+   the accent and a hairline underline beneath it. Clicking a stage explains
+   what it does in the copy beside the diagram; it does not turn the rest of
+   the picture off. */
+.flow-svg .fx { transition: opacity 0.3s var(--ease); }
+[data-flow][data-active] .fx { cursor: pointer; }
+
+/* Hover no longer touches opacity. With every stage at full strength there is
+   nothing to lift TO — a hover opacity below 1 reads as the stage dimming,
+   which is the opposite of "this is clickable". The affordance is the faint
+   wash on the hit rect plus the pointer cursor. */
+[data-flow][data-active] .fx:hover .fx-hit { fill-opacity: 0.03; }
 .flow-svg .fx-hit { fill: #fff; transition: fill-opacity 0.25s var(--ease); }
-[data-flow][data-active="1"] .fx[data-fx="1"],
-[data-flow][data-active="2"] .fx[data-fx="2"],
-[data-flow][data-active="3"] .fx[data-fx="3"],
-[data-flow][data-active="4"] .fx[data-fx="4"],
-[data-flow][data-active="5"] .fx[data-fx="5"] { opacity: 1; }
 
 /* the picked stage names itself in the accent, the way the eyebrow does */
 [data-flow][data-active="1"] .fx[data-fx="1"] .fx-label,
@@ -2967,6 +2982,15 @@ body::after {
 [data-flow][data-active="3"] .fx[data-fx="3"] .fx-label,
 [data-flow][data-active="4"] .fx[data-fx="4"] .fx-label,
 [data-flow][data-active="5"] .fx[data-fx="5"] .fx-label { fill: var(--nx-accent); }
+
+/* and carries a rule under that label, so the selection is legible without
+   anything else having to go dark */
+.fx-rule { opacity: 0; transition: opacity 0.3s var(--ease); }
+[data-flow][data-active="1"] .fx[data-fx="1"] .fx-rule,
+[data-flow][data-active="2"] .fx[data-fx="2"] .fx-rule,
+[data-flow][data-active="3"] .fx[data-fx="3"] .fx-rule,
+[data-flow][data-active="4"] .fx[data-fx="4"] .fx-rule,
+[data-flow][data-active="5"] .fx[data-fx="5"] .fx-rule { opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   .flow-svg .fx { transition: none; }
@@ -3001,4 +3025,72 @@ body::after {
   .path-pick { margin-top: 36px; }
   /* same call the pinned rig made: below 900 the numeral collides with copy */
   .path-figure { display: none; }
+}
+
+/* ============================================================
+   AI detection overlay on a clip  (2026-08-22)
+   ============================================================
+
+   Three of the four detection clips carry the model's boxes burned into the
+   export. The fall capture does not — its box only exists on the poster still —
+   so it is drawn here instead, over the <video>, which is what the product
+   actually does to a live feed anyway. Burning it in was not an option: the
+   ffmpeg on this machine (the one inside the Remotion package) is built with
+   --disable-filters and has no drawbox, drawtext or overlay.
+
+   Geometry is declared per clip in the markup as --l/--t/--w/--h percentages,
+   and `data-at` is the second the detection lands. site.js adds .is-on then, so
+   the box snaps in on the fall rather than sitting over an empty floor for the
+   first three seconds. */
+.ai-box {
+  position: absolute;
+  left: var(--l);
+  top: var(--t);
+  width: var(--w);
+  height: var(--h);
+  border: 2px solid var(--nx-accent);
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s linear;
+}
+.ai-box.is-on { opacity: 1; }
+
+/* the label chip sits on the box's top edge, like the burned-in ones do */
+.ai-box b {
+  position: absolute;
+  left: -2px;
+  bottom: 100%;
+  display: block;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  padding: 4px 7px;
+  background: var(--nx-accent);
+  color: #03080c;
+  white-space: nowrap;
+}
+
+/* Corner ticks, so it reads as an instrument rather than a plain rectangle —
+   the same registration language as the section ticks. */
+.ai-box i {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: 0 solid #fff;
+}
+.ai-box i:nth-child(1) { top: -2px;    left: -2px;    border-top-width: 2px;    border-left-width: 2px; }
+.ai-box i:nth-child(2) { top: -2px;    right: -2px;   border-top-width: 2px;    border-right-width: 2px; }
+.ai-box i:nth-child(3) { bottom: -2px; left: -2px;    border-bottom-width: 2px; border-left-width: 2px; }
+.ai-box i:nth-child(4) { bottom: -2px; right: -2px;   border-bottom-width: 2px; border-right-width: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-box { transition: none; }
+}
+
+@media (max-width: 760px) {
+  .ai-box b { font-size: 10.5px; padding: 3px 5px; }
+  .ai-box i { width: 7px; height: 7px; }
 }
