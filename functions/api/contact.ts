@@ -68,6 +68,12 @@ const FIELDS: Record<string, string> = {
   footage: 'Footage they can share',
 };
 
+const REQUIRED_DEMO = ['name', 'email', 'company', 'phone', 'sector', 'cameras', 'problem'];
+const REQUIRED_PILOT = [
+  'name', 'email', 'company', 'phone', 'sector', 'site_city',
+  'cameras', 'sites_total', 'prove', 'start_when',
+];
+
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -94,8 +100,19 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 
   const name = get('name');
   const email = get('email');
+  const isPilot = get('form_type') === 'pilot';
 
-  if (!name || !email) return json({ ok: false, reason: 'missing-required' }, 422);
+  /* Mirrors the `required` attributes on each form. Enforced here too because
+     most spam never loads the page — it POSTs straight to this endpoint, so
+     browser validation never runs. Keep in sync with contact.astro and
+     pilot/apply.astro. */
+  const required = isPilot ? REQUIRED_PILOT : REQUIRED_DEMO;
+  if (required.some((k) => !get(k))) return json({ ok: false, reason: 'missing-required' }, 422);
+
+  const story = get(isPilot ? 'prove' : 'problem');
+  if (story.length < 20 || get('phone').replace(/\D/g, '').length < 7) {
+    return json({ ok: false, reason: 'missing-required' }, 422);
+  }
   /* Deliberately loose. The input is type="email" so the browser has already
      done the strict pass; this only stops obvious junk reaching the provider. */
   if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) {
@@ -120,7 +137,6 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 
   /* form_type is not in FIELDS on purpose — it steers the subject line rather
      than appearing as a line in the body. */
-  const isPilot = get('form_type') === 'pilot';
   const subject = `${isPilot ? 'PILOT application' : 'Demo request'} — ${get('company') || name}`;
   const text = lines.join('\n');
   const html = `<pre style="font:14px/1.6 ui-monospace,monospace;white-space:pre-wrap">${esc(text)}</pre>`;
