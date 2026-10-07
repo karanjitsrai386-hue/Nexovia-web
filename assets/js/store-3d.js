@@ -43,6 +43,18 @@ function init(host) {
   })();
 
   const scene = new THREE.Scene();
+
+  /* Depth. The room is 12 x 9 metres and every shelf at the back was
+     rendering exactly as sharply as the counter in front of the camera, so
+     nothing read as foreground and the whole film sat on one plane.
+
+     Exponential fog tinted to the page ground (--bg, #05070a) means the
+     far wall falls away into the same black the page is on, which reads as
+     the room continuing past the frame rather than ending at a flat wall.
+     At this density a surface 10m out is ~18% fogged and one at 15m ~37%.
+     Keep the colour equal to --bg: the canvas is alpha:true over the page,
+     so any other value shows as a haze against the surrounding ground. */
+  scene.fog = new THREE.FogExp2(0x05070a, 0.05);
   const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 200);
 
   /* A WebGL context is not guaranteed. iOS drops them under memory pressure
@@ -82,7 +94,12 @@ function init(host) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.55;
+  /* 1.28, down from 1.55. The scene’s own materials are genuinely dark —
+     the floor is #080b11 and the walls #070a0f — but exposure that high
+     lifted them into the same mid grey as the shelving, so the image had no
+     black point and read washed out. The key light below is raised to match,
+     otherwise this trades a washed image for a murky one. */
+  renderer.toneMappingExposure = 1.28;
   /* soft shadows: contact shadows under the hardware and the figures
      are what stop everything looking like it is floating */
   renderer.shadowMap.enabled = true;
@@ -978,7 +995,7 @@ function init(host) {
 
   /* ---------- lighting ---------- */
   scene.add(new THREE.AmbientLight(0x33465e, 1.15));
-  const key = new THREE.DirectionalLight(0xe6f1fc, 1.55);
+  const key = new THREE.DirectionalLight(0xe6f1fc, 1.9);   /* was 1.55 — compensates the exposure drop */
   key.position.set(7, 11, 6);
   key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
