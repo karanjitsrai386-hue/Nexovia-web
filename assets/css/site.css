@@ -323,6 +323,17 @@ em, .accent-em {
   color: var(--text-2);
 }
 
+/* "Sample data shown." under console captures that carry illustrative data.
+   Deliberately quiet: it is a disclosure, not a caption to read. */
+.sample-note {
+  margin-top: 8px;
+  font-family: var(--sans);
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  opacity: 0.55;
+}
+
 /* general-purpose small prose — Syne, not mono. Mono is for values you compare
    character by character; this class carries sentences. */
 .small {
